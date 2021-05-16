@@ -15,12 +15,19 @@ void TeamManager()
     pthread_t tid[NumCars]; //thread id
     pthread_mutex_init(&mutex, NULL);
 
-    for (int i = 0; i < NumCars; i++)
+    while (1)
     {
-        if (pthread_create(&tid[i], NULL, Carro, NULL) != 0)
+        if (SharedMemory->infoRace == 1)
         {
-            perror("Erro a criar thread.\n");
-            exit(1);
+            for (int i = 0; i < NumCars; i++)
+            {
+                if (pthread_create(&tid[i], NULL, Carro, NULL) != 0)
+                {
+                    perror("Erro a criar thread.\n");
+                    exit(1);
+                }
+            }
+            break;
         }
     }
 
@@ -41,6 +48,8 @@ void TeamManager()
 //Car thread
 void *Carro()
 {
+    printf("A\n");
+
     // pthread_mutex_lock(&mutex);
     // printf("Carro da equipa %d\n", getpid());
     // pthread_mutex_unlock(&mutex);

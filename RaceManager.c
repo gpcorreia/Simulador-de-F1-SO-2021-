@@ -8,6 +8,7 @@ int handleCommand(char *commands);
 int insereCarro(char *team, int carro, int speed, float consumption, int reliability);
 int checkTeam(char *team, int carro, int speed, float consumption, int reliability);
 int handleCommand(char *commands);
+int checkCar(int car);
 void printLista();
 void writeLog(char *info);
 
@@ -21,7 +22,7 @@ void RaceManager()
     pid_t myid = getpid();
     int nread;
     char CommandsNP[1000];
-    char infos[1000];
+    char infos[1024];
     pipe(p);
 
     for (int i = 0; i < NumTeam; i++)
@@ -72,7 +73,14 @@ void RaceManager()
                     int speed, reliability, carro;
                     float consumption;
                     sscanf(CommandsNP, "ADDCAR TEAM: %c, CAR: %d, SPEED: %d, CONSUMPTION: %f, RELIABILITY: %d", team, &carro, &speed, &consumption, &reliability);
-                    insereCarro(team, carro, speed, consumption, reliability);
+                    if (checkCar(carro) != 0)
+                    {
+                        insereCarro(team, carro, speed, consumption, reliability);
+                    }
+                    else
+                    {
+                        writeLog("Car Already exist!");
+                    }
                 }
                 else
                 {
@@ -167,6 +175,30 @@ void printLista()
         }
         proximo = proximo->next;
     }
+}
+
+int checkCar(int car)
+{
+    Team *proximo = SharedMemory->teams;
+
+    if (proximo == NULL)
+    {
+        printf("Lista Vazia\n");
+    }
+
+    while (proximo != NULL)
+    {
+        for (int i = 0; i < proximo->Numcars; i++)
+        {
+            if (proximo->cars[i].model == car)
+            {
+                return 0; //se o carro ja existir
+            }
+        }
+        proximo = proximo->next;
+    }
+
+    return 1; //se o carro nao existir
 }
 
 int checkTeam(char *team, int carro, int speed, float consumption, int reliability)
