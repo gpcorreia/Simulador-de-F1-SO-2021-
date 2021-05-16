@@ -8,8 +8,10 @@ int handleCommand(char *commands);
 int insereCarro(char *team, int carro, int speed, float consumption, int reliability);
 int checkTeam(char *team, int carro, int speed, float consumption, int reliability);
 int handleCommand(char *commands);
+int checkCar(int car);
 void printLista();
 void writeLog(char *info);
+void createTM();
 
 void RaceManager()
 {
@@ -18,12 +20,10 @@ void RaceManager()
     printf("O meu é %d\n", getpid());
     printf("O meu pai é %d\n", getppid());
 
-    pid_t myid = getpid();
     int nread;
     char CommandsNP[1000];
     char infos[1024];
     pipe(p);
-
 
     if ((fdPipe = open(PIPE_NAME, O_RDONLY | O_NONBLOCK)) < 0)
     {
@@ -32,30 +32,24 @@ void RaceManager()
     }
     while (1)
     {
+        //verificaCorrida();
+        // if (SharedMemory->FinishCars == NumCars)
+        // {
+        //     printf("Acabou a Corrida\n");
+        //     break;
+        // }
         if ((nread = read(fdPipe, &CommandsNP, sizeof(char) * 10000)) != 0) //named pipe
         {
             CommandsNP[nread] = '\0';
 
             if (strcmp(CommandsNP, "START RACE!\n") == 0 && SharedMemory->NumTeams == NumTeam)
             {
-                for (int i = 0; i < NumTeam; i++)
-                {
-                    if (getpid() == myid)
-                    {
-                        if (fork() == 0)
-                        {
-                            TeamManager();
-                            //sleep(5);
-                            exit(0);
-                        }
-                    }
-                }
-
                 SharedMemory->infoRace = 1;
                 infos[0] = '\0';
                 sprintf(infos, "NEW COMMAND RECEIVED: START RACE");
                 writeLog(infos);
-                printLista();
+                createTM();
+                // printLista();
             }
             else if (strcmp(CommandsNP, "START RACE!\n") == 0 && SharedMemory->NumTeams < NumTeam)
             {
@@ -72,7 +66,14 @@ void RaceManager()
                     int speed, reliability, carro;
                     float consumption;
                     sscanf(CommandsNP, "ADDCAR TEAM: %c, CAR: %d, SPEED: %d, CONSUMPTION: %f, RELIABILITY: %d", team, &carro, &speed, &consumption, &reliability);
-                    insereCarro(team, carro, speed, consumption, reliability);
+                    if (checkCar(carro) != 0)
+                    {
+                        insereCarro(team, carro, speed, consumption, reliability);
+                    }
+                    else
+                    {
+                        writeLog("Car Already exist!");
+                    }
                 }
                 else
                 {
@@ -95,6 +96,24 @@ void RaceManager()
     for (int i = 0; i < NumTeam; i++)
     {
         wait(NULL);
+    }
+}
+
+void createTM()
+{
+    Team *teamsAx = SharedMemory->teams;
+
+    while (teamsAx != NULL)
+    {
+
+        if (fork() == 0)
+        {
+            TeamManager(teamsAx);
+            sleep(5);
+            exit(0);
+        }
+
+        teamsAx = teamsAx->next;
     }
 }
 
@@ -167,6 +186,30 @@ void printLista()
         }
         proximo = proximo->next;
     }
+}
+
+int checkCar(int car)
+{
+    Team *proximo = SharedMemory->teams;
+
+    if (proximo == NULL)
+    {
+        printf("Lista Vazia\n");
+    }
+
+    while (proximo != NULL)
+    {
+        for (int i = 0; i < proximo->Numcars; i++)
+        {
+            if (proximo->cars[i].model == car)
+            {
+                return 0; //se o carro ja existir
+            }
+        }
+        proximo = proximo->next;
+    }
+
+    return 1; //se o carro nao existir
 }
 
 int checkTeam(char *team, int carro, int speed, float consumption, int reliability)

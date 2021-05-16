@@ -15,4 +15,6 @@
 #define MUTEX_SH "MT SharedMem"       //mutex for shared memory
 #define PIPE_NAME "namedpipe"
 
+#define KEY 2212
+
 #endif
