@@ -32,8 +32,15 @@ void F1simulator() //gestor de corrida("RaceManager") + gestor de Avarias("...")
     }
     if ((pid2 = fork()) == 0)
     {
-        MalfunctionManager(); // Gestor de Avarias
-        exit(0);
+        while (1)
+        {
+            if (SharedMemory->infoRace != 0)
+            {
+                MalfunctionManager(); // Gestor de Avarias
+                exit(0);
+                break;
+            }
+        }
     }
     else
     {
@@ -52,7 +59,7 @@ void init()
     ConfigRead(); //ler ficheiro de config
 
     //create shared memory
-    shmid = shmget(IPC_PRIVATE, sizeof(SHARED_MEMORY), IPC_CREAT | 0700);
+    shmid = shmget(KEY, sizeof(SHARED_MEMORY), IPC_CREAT | 0700);
 
     //attach shared memory
     if ((SharedMemory = (SHARED_MEMORY *)shmat(shmid, NULL, 0)) == (SHARED_MEMORY *)-1)

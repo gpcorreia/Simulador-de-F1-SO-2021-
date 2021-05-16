@@ -32,10 +32,11 @@ typedef struct Team
 
 typedef struct shared_memory
 {
-    int infoRace; // 1- if Started Race
+    int infoRace; // 1- if Started Race/resume     2 - if Pause
     int NumCars;
     int NumTeams;
-    Team *teams;
+    Team *teams; //lista ligada de equipas
+
 } SHARED_MEMORY;
 
 #endif
