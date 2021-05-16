@@ -6,7 +6,7 @@
 void *Carro();
 void leitura();
 
-void TeamManager()
+void TeamManager(Team *teamsAx)
 {
     // printf("A minha Equipa é %d\n", getpid());
     // printf("O meu pai é %d\n", getppid());
@@ -15,19 +15,12 @@ void TeamManager()
     pthread_t tid[NumCars]; //thread id
     pthread_mutex_init(&mutex, NULL);
 
-    while (1)
+    for (int i = 0; i < teamsAx->Numcars; i++)
     {
-        if (SharedMemory->infoRace == 1)
+        if (pthread_create(&tid[i], NULL, &Carro, (void *)&teamsAx->cars[i]) != 0)
         {
-            for (int i = 0; i < NumCars; i++)
-            {
-                if (pthread_create(&tid[i], NULL, Carro, NULL) != 0)
-                {
-                    perror("Erro a criar thread.\n");
-                    exit(1);
-                }
-            }
-            break;
+            perror("Erro a criar thread.\n");
+            exit(1);
         }
     }
 
@@ -46,13 +39,33 @@ void TeamManager()
 }
 
 //Car thread
-void *Carro()
+void *Carro(Car *car)
 {
-    printf("A\n");
+    int TotalDistance = lap * dv;
+    char message[1000];
 
-    // pthread_mutex_lock(&mutex);
-    // printf("Carro da equipa %d\n", getpid());
-    // pthread_mutex_unlock(&mutex);
+    printf("Carro : %d ----- Team %s\n", car->model, car->team);
+    printf("O meu Gestor %d\n", getpid());
+
+    while (TotalDistance > 0)
+    {
+        printf("%d\n", TotalDistance);
+
+        TotalDistance -= car->speed;
+        sleep(1);
+    }
+
+    if (SharedMemory->FinishCars == 0)
+    {
+        printf("Carro : %d ----- Team %s -> Ganhou a Corrida!!\n", car->model, car->team);
+        SharedMemory->FinishCars++;
+    }
+    else
+    {
+        printf("Carro : %d ----- Team %s -> Terminou a Corrida!!\n", car->model, car->team);
+        SharedMemory->FinishCars++;
+    }
+
     pthread_exit(NULL);
     return NULL;
 }

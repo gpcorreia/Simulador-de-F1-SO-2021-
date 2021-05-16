@@ -11,6 +11,7 @@ int handleCommand(char *commands);
 int checkCar(int car);
 void printLista();
 void writeLog(char *info);
+void createTM();
 
 void RaceManager()
 {
@@ -19,24 +20,10 @@ void RaceManager()
     printf("O meu é %d\n", getpid());
     printf("O meu pai é %d\n", getppid());
 
-    pid_t myid = getpid();
     int nread;
     char CommandsNP[1000];
     char infos[1024];
     pipe(p);
-
-    for (int i = 0; i < NumTeam; i++)
-    {
-        if (getpid() == myid)
-        {
-            if (fork() == 0)
-            {
-                TeamManager();
-                sleep(5);
-                exit(0);
-            }
-        }
-    }
 
     if ((fdPipe = open(PIPE_NAME, O_RDONLY | O_NONBLOCK)) < 0)
     {
@@ -46,6 +33,12 @@ void RaceManager()
 
     while (1)
     {
+        //verificaCorrida();
+        // if (SharedMemory->FinishCars == NumCars)
+        // {
+        //     printf("Acabou a Corrida\n");
+        //     break;
+        // }
         if ((nread = read(fdPipe, &CommandsNP, sizeof(char) * 10000)) != 0) //named pipe
         {
             CommandsNP[nread] = '\0';
@@ -56,7 +49,8 @@ void RaceManager()
                 infos[0] = '\0';
                 sprintf(infos, "NEW COMMAND RECEIVED: START RACE");
                 writeLog(infos);
-                printLista();
+                createTM();
+                // printLista();
             }
             else if (strcmp(CommandsNP, "START RACE!\n") == 0 && SharedMemory->NumTeams < NumTeam)
             {
@@ -103,6 +97,24 @@ void RaceManager()
     for (int i = 0; i < NumTeam; i++)
     {
         wait(NULL);
+    }
+}
+
+void createTM()
+{
+    Team *teamsAx = SharedMemory->teams;
+
+    while (teamsAx != NULL)
+    {
+
+        if (fork() == 0)
+        {
+            TeamManager(teamsAx);
+            sleep(5);
+            exit(0);
+        }
+
+        teamsAx = teamsAx->next;
     }
 }
 
