@@ -34,6 +34,7 @@ typedef struct shared_memory
 {
     int infoRace; // 1- if Started Race/resume     2 - if Pause
     int NumCars;
+    int FinishCars;
     int NumTeams;
     Team *teams; //lista ligada de equipas
 
