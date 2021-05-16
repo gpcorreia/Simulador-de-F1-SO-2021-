@@ -38,4 +38,10 @@ typedef struct shared_memory
     Team *teams;
 } SHARED_MEMORY;
 
+typedef struct mq_message
+{
+    long msgtype;
+    int avaria;   // 1 -> tem avaria; 0-> nao tem avaria 
+} message;
+
 #endif

@@ -24,8 +24,8 @@ void TeamManager()
         }
     }
 
-    sleep(5); //simular codigo a correr
-    // leitura();
+    //sleep(5); //simular codigo a correr
+    //leitura();
 
     //Esperar que todas as threads terminem
     for (int i = 0; i < NumCars; i++)
@@ -39,11 +39,24 @@ void TeamManager()
 }
 
 //Car thread
-void *Carro()
+void *Carro(Car* carro)
 {
     // pthread_mutex_lock(&mutex);
     // printf("Carro da equipa %d\n", getpid());
     // pthread_mutex_unlock(&mutex);
+    message* my_msg;
+
+    while(1)
+    {
+        //printf("aqui\n");
+        if(msgrcv(msqid,  my_msg, sizeof(my_msg) - sizeof(long), carro->model, 0) == -1)
+        {
+            perror("Error: msgrcv()\n");
+            exit(1);
+        }
+        printf("avaria ? -> %d", my_msg->avaria);
+    }
+
     pthread_exit(NULL);
     return NULL;
 }

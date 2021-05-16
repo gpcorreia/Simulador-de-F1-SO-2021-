@@ -21,28 +21,15 @@ void RaceManager()
     pid_t myid = getpid();
     int nread;
     char CommandsNP[1000];
-    char infos[1000];
+    char infos[1024];
     pipe(p);
 
-    for (int i = 0; i < NumTeam; i++)
-    {
-        if (getpid() == myid)
-        {
-            if (fork() == 0)
-            {
-                TeamManager();
-                sleep(5);
-                exit(0);
-            }
-        }
-    }
 
     if ((fdPipe = open(PIPE_NAME, O_RDONLY | O_NONBLOCK)) < 0)
     {
         perror("Cannot open Pipe:\n");
         exit(0);
     }
-
     while (1)
     {
         if ((nread = read(fdPipe, &CommandsNP, sizeof(char) * 10000)) != 0) //named pipe
@@ -51,6 +38,19 @@ void RaceManager()
 
             if (strcmp(CommandsNP, "START RACE!\n") == 0 && SharedMemory->NumTeams == NumTeam)
             {
+                for (int i = 0; i < NumTeam; i++)
+                {
+                    if (getpid() == myid)
+                    {
+                        if (fork() == 0)
+                        {
+                            TeamManager();
+                            //sleep(5);
+                            exit(0);
+                        }
+                    }
+                }
+
                 SharedMemory->infoRace = 1;
                 infos[0] = '\0';
                 sprintf(infos, "NEW COMMAND RECEIVED: START RACE");
@@ -141,7 +141,7 @@ int insereCarro(char *team, int carro, int speed, float consumption, int reliabi
     if (aux != 2)
     {
         char info[1000];
-        sprintf(info, "NEW LOADED => TEAM: %s, CAR: %d, SPEED: %d, CONSUMPTION: %f, RELIABILITY: %d", team, carro, speed, consumption, reliability);
+        sprintf(info, "NEW CAR LOADED => TEAM: %s, CAR: %d, SPEED: %d, CONSUMPTION: %f, RELIABILITY: %d", team, carro, speed, consumption, reliability);
         writeLog(info);
     }
 
