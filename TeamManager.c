@@ -24,8 +24,8 @@ void TeamManager(Team *teamsAx)
         }
     }
 
-    sleep(5); //simular codigo a correr
-    // leitura();
+    //sleep(5); //simular codigo a correr
+    //leitura();
 
     //Esperar que todas as threads terminem
     for (int i = 0; i < NumCars; i++)
@@ -39,8 +39,13 @@ void TeamManager(Team *teamsAx)
 }
 
 //Car thread
-void *Carro(Car *car)
+void *Carro(Car* car)
 {
+    // pthread_mutex_lock(&mutex);
+    // printf("Carro da equipa %d\n", getpid());
+    // pthread_mutex_unlock(&mutex);
+    message* my_msg;
+
     int TotalDistance = lap * dv;
     char message[1000];
 
@@ -50,6 +55,13 @@ void *Carro(Car *car)
     while (TotalDistance > 0)
     {
         printf("%d\n", TotalDistance);
+        
+        if(msgrcv(msqid,  my_msg, sizeof(my_msg) - sizeof(long), car->model, 0) == -1)
+        {
+            perror("Error: msgrcv()\n");
+            exit(1);
+        }
+        printf("avaria ? -> %d", my_msg->avaria);
 
         TotalDistance -= car->speed;
         sleep(1);

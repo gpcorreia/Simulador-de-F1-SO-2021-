@@ -20,6 +20,8 @@ int NumCarsRace;
 int fdPipe; // file descriptor do named pipe
 int p[2];   // file descriptor do unnamed pipe
 
+int msqid; //message queue id
+
 int shmid;                   //shared memory id
 SHARED_MEMORY *SharedMemory; //shared memory
 

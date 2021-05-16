@@ -99,6 +99,12 @@ void init()
         exit(1);
     }
 
+    if((msqid = msgget(IPC_PRIVATE, IPC_CREAT|0777)) == -1)
+    {
+        perror("Error: msgget()\n");
+        exit(1);
+    }
+
     printf("----Program Started----\n");
     writeLog("SIMULATOR STARTING");
 }
@@ -178,7 +184,6 @@ void closeSimulator()
         perror("Erro ao apagar MUTEX_SH.\n");
         exit(1);
     }
-
     //Destruição do (named) mutex usado para o controlo da escrita no log.txt
     if (sem_close(mutex_write_log))
     {
@@ -200,4 +205,12 @@ void closeSimulator()
         perror("Erro ao apagar MUTEX_UP.\n");
         exit(1);
     }
+
+    if(msgctl(msqid, IPC_RMID, 0) == -1)
+    {
+        perror("Error: msgctl()\n");
+        exit(1);
+    }
+
+    kill(0, SIGKILL);
 }

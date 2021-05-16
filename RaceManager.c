@@ -30,7 +30,6 @@ void RaceManager()
         perror("Cannot open Pipe:\n");
         exit(0);
     }
-
     while (1)
     {
         //verificaCorrida();
@@ -161,7 +160,7 @@ int insereCarro(char *team, int carro, int speed, float consumption, int reliabi
     if (aux != 2)
     {
         char info[1000];
-        sprintf(info, "NEW LOADED => TEAM: %s, CAR: %d, SPEED: %d, CONSUMPTION: %f, RELIABILITY: %d", team, carro, speed, consumption, reliability);
+        sprintf(info, "NEW CAR LOADED => TEAM: %s, CAR: %d, SPEED: %d, CONSUMPTION: %f, RELIABILITY: %d", team, carro, speed, consumption, reliability);
         writeLog(info);
     }
 
