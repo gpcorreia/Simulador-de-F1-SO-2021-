@@ -4,11 +4,11 @@
 #include "structs.h"
 
 void init();
-void CreateShm();
 void ConfigRead();
 void RaceManager();
 void MalfunctionManager();
 void writeLog(char *info);
+void closeSimulator();
 void closeSimulator();
 void PrintStats();
 void endRace();
@@ -59,14 +59,21 @@ void init()
     ConfigRead(); //ler ficheiro de config
 
     //create shared memory
-    CreateShm();
-
-    shmidTeams = shmget(KEY, sizeof(Team) * NumTeam, IPC_CREAT | 0700);
+    shmid = shmget(IPC_PRIVATE, sizeof(SHARED_MEMORY), IPC_CREAT | 0700);
 
     //attach shared memory
-    if ((SharedMemory->teams = (Team *)shmat(shmid, NULL, 0)) == (Team *)-1)
+    if ((SharedMemory = (SHARED_MEMORY *)shmat(shmid, NULL, 0)) == (SHARED_MEMORY *)-1)
     {
-        perror("Shmat error!\n");
+        perror("Shmat error shmid!\n");
+        exit(1);
+    }
+
+    shmidTeams = shmget(IPC_PRIVATE, sizeof(Team) * NumTeam, IPC_CREAT | 0700);
+   
+    //attach shared memory
+    if ((SharedMemory->teams = (Team *)shmat(shmidTeams, NULL, 0)) == (Team *)-1)
+    {
+        perror("Shmat error shmidTeams!\n");
         exit(1);
     }
     //init of Shared Memory
@@ -115,35 +122,6 @@ void init()
 
     printf("----Program Started----\n");
     writeLog("SIMULATOR STARTING");
-}
-
-void CreateShm()
-{
-    if((shmid = shmget(IPC_PRIVATE, sizeof(SHARED_MEMORY), IPC_CREAT | 0700)) == -1)
-    {
-        perror("Error: shmget()\n");
-        exit(1);
-    }
-
-    if ((SharedMemory = (SHARED_MEMORY *)shmat(shmid, NULL, 0)) == (SHARED_MEMORY *)-1)
-    {
-        perror("Shmat error!\n");
-        exit(1);
-    }
-
-    if((shmid2 = shmget(IPC_PRIVATE, sizeof(Team)*NumTeam, IPC_CREAT | 0700)) == -1)
-    {
-        perror("Error: shmget()\n");
-        exit(1);
-    }
-
-    if ((SharedMemory->HeadTeams = (Team *)shmat(shmid2, NULL, 0)) == (Team *)-1)
-    {
-        perror("Shmat error!\n");
-        exit(1);
-    }
-
-    teams = SharedMemory->HeadTeams;
 }
 
 void ConfigRead()
@@ -196,6 +174,21 @@ void endRace()
 //eliminar todos  os recursos requisitados pelos processos (semaforos, memorias partilhadas...)
 void closeSimulator()
 {
+
+    //desattach da memória partilhada
+    if (shmdt(SharedMemory->teams) == -1)
+    {
+        perror("Erro shmdt.\n");
+        exit(1);
+    }
+
+    //Destruição da memoria partilhada
+    if (shmctl(shmidTeams, IPC_RMID, NULL) != 0)
+    {
+        perror("Erro ao destruir a memoria partilhadashmidTeams.\n");
+        exit(1);
+    }
+
     //desattach da memória partilhada
     if (shmdt(SharedMemory) == -1)
     {
@@ -206,21 +199,7 @@ void closeSimulator()
     //Destruição da memoria partilhada
     if (shmctl(shmid, IPC_RMID, NULL) != 0)
     {
-        perror("Erro ao destruir a memoria partilhada.\n");
-        exit(1);
-    }
-
-    //desattach da memória partilhada
-    if (shmdt(teams) == -1)
-    {
-        perror("Erro shmdt.\n");
-        exit(1);
-    }
-
-    //Destruição da memoria partilhada
-    if (shmctl(shmid2, IPC_RMID, NULL) != 0)
-    {
-        perror("Erro ao destruir a memoria partilhada.\n");
+        perror("Erro ao destruir a memoria partilhada shmid.\n");
         exit(1);
     }
 

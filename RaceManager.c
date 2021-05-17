@@ -90,7 +90,7 @@ void RaceManager()
         // if (write(p[1], &ola, sizeof(ola)) != 0)
         // {
         //     printf("%s\n", stateTM);
-        // }s
+        // }
     }
 
     for (int i = 0; i < NumTeam; i++)
@@ -114,7 +114,6 @@ void createTM()
 
 int insereCarro(char *team, int carro, int speed, float consumption, int reliability)
 {
-    printf("a entrar em checkTeam()\n");
     int aux = checkTeam(team, carro, speed, consumption, reliability);
 
     if (aux == 1) // nao existe equipa
@@ -141,12 +140,9 @@ int insereCarro(char *team, int carro, int speed, float consumption, int reliabi
     }
     if (aux != 2)
     {
-        printf("aqui\n");
         char info[1000];
         sprintf(info, "NEW CAR LOADED => TEAM: %s, CAR: %d, SPEED: %d, CONSUMPTION: %f, RELIABILITY: %d", team, carro, speed, consumption, reliability);
-        printf("aqui2\n");
-        //writeLog(info);
-        printf("dps do aqui\n");
+        writeLog(info);
     }
 
     return 0;
@@ -163,7 +159,6 @@ void printLista()
             printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].model);
         }
     }
-
 }
 
 int checkCar(int car)
