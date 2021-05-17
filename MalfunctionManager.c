@@ -4,74 +4,69 @@
 #include "structs.h"
 
 void printLista();
+int gera_avarias(int reliability);
+int notificaCarros();
 
 void MalfunctionManager()
 {
-    //create shared memory
-    shmid = shmget(KEY, sizeof(SHARED_MEMORY), 0);
-
-    //attach shared memory
-    if ((SharedMemory = (SHARED_MEMORY *)shmat(shmid, NULL, 0)) == (SHARED_MEMORY *)-1)
-    {
-        perror("Shmat error!\n");
-        exit(1);
-    }
-
     // pid_t pid;
     printf("Gestor de Avarias Iniciado\n");
     printf("O meu é %d\n", getpid());
     printf("O meu pai é %d\n", getppid());
 
     //sleep(5); //simular codigo a correr
-
     while (1)
     {
-
         //sleep T_Avaria unidades de tempo, em segundos
+        //printf("Avarias a surgir em %d s\n", PitLane);
         sleep(PitLane);
+        //printf("avarias a ocorrer\n");
 
         //determina se ocorre uma avaria e notifica os carros atraves da message queue
         notificaCarros();
     }
+
 }
 
 //retorna 0 se nao tiver avaria e 1 se tiver
 int gera_avarias(int reliability)
 {
-    int isAvaria = 0;
-    isAvaria = 1;
-    return isAvaria;
+    int isAvaria;
+    isAvaria = rand() % 100;
+    if (isAvaria >= reliability)
+    {
+        return 1;
+    }
+    return 0;
 }
 
 int notificaCarros()
 {
-    Team *proximo = SharedMemory->teams;
     int auxAvaria;
-    message *msg;
+    message msg;
 
-    if (proximo == NULL)
+    if (SharedMemory->NumTeams == 0)
     {
-        printf("Lista Vazia\n");
+        printf("Lista de equipas Vazia\n");
     }
 
-    // while (proximo != NULL)
-    // {
-    //     for(int i=0; i<proximo->Numcars; i++)
-    //     {
-    //         //gera a avaria (ou nao)
-    //         auxAvaria = gera_avarias(proximo->cars[i].reliability);
-    //         msg->msgtype=proximo->cars[i].model;
-    //         msg->avaria=auxAvaria;
+    for (int i=0; i<SharedMemory->NumTeams; i++)
+    {
+        for(int j=0; j<EquipasSHM[i].Numcars; j++)
+        {
+            //gera a avaria (ou nao)
+            auxAvaria = gera_avarias(EquipasSHM[i].cars[j].reliability);
+            msg.msgtype=EquipasSHM[i].cars[j].model;
+            msg.avaria=auxAvaria;
 
-    //         //notifica o carro
-    //         if(msgsnd(msqid, msg, sizeof(msg) - sizeof(long), 0) == -1)
-    //         {
-    //             perror("Error: msgsnd()\n");
-    //             exit(1);
-    //         }
-
-    //     }
-    //     proximo = proximo->next;
-    // }
+            //notifica o carro
+            if(msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1)
+            {
+                perror("Error: msgsnd()\n");
+                exit(1);
+            }
+            //printf("Enviei para mq -> carro: %ld, avaria: %d\n", msg.msgtype, msg.avaria);
+        }
+    }
     return 0;
 }

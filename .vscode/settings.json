@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "includes.h": "c",
-        "defines.h": "c"
+        "defines.h": "c",
+        "stat.h": "c"
     }
 }

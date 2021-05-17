@@ -47,7 +47,7 @@ void *Carro(Car *car)
     // pthread_mutex_lock(&mutex);
     // printf("Carro da equipa %d\n", getpid());
     // pthread_mutex_unlock(&mutex);
-    message *my_msg;
+    message my_msg;
 
     int TotalDistance = lap * dv;
     int combustivel = oilcap;
@@ -60,14 +60,15 @@ void *Carro(Car *car)
 
     while (TotalDistance > 0)
     {
-        // printf("%d\n", TotalDistance);
+        printf("%d\n", TotalDistance);
 
-        // if(msgrcv(msqid,  my_msg, sizeof(my_msg) - sizeof(long), car->model, 0) == -1)
-        // {
-        //     perror("Error: msgrcv()\n");
-        //     exit(1);
-        // }
-        // printf("avaria ? -> %d", my_msg->avaria);
+        if (msgrcv(msqid, &my_msg, sizeof(my_msg) - sizeof(long), car->model, IPC_NOWAIT) == -1)
+        {
+            //perror("Error: msgrcv()\n");
+            //exit(1);
+        }
+        //printf("my_msg -> %ld, %d\n", my_msg.msgtype, my_msg.avaria);
+        //printf("carro -> %d, avaria ? -> %d\n", car->model, my_msg.avaria);
         if (my_msg->avaria == 1)
         {
             for (int i = 0; i < SharedMemory->NumTeams; i++)
