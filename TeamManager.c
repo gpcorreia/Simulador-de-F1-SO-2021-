@@ -6,7 +6,7 @@
 void *Carro();
 void leitura();
 
-void TeamManager(Team *teamsAx)
+void TeamManager(Team teamsAx)
 {
     // printf("A minha Equipa é %d\n", getpid());
     // printf("O meu pai é %d\n", getppid());
@@ -15,9 +15,9 @@ void TeamManager(Team *teamsAx)
     pthread_t tid[NumCars]; //thread id
     pthread_mutex_init(&mutex, NULL);
 
-    for (int i = 0; i < teamsAx->Numcars; i++)
+    for (int i = 0; i < teamsAx.Numcars; i++)
     {
-        if (pthread_create(&tid[i], NULL, &Carro, (void *)&teamsAx->cars[i]) != 0)
+        if (pthread_create(&tid[i], NULL, &Carro, (void *)&teamsAx.cars[i]) != 0)
         {
             perror("Erro a criar thread.\n");
             exit(1);
@@ -39,12 +39,12 @@ void TeamManager(Team *teamsAx)
 }
 
 //Car thread
-void *Carro(Car* car)
+void *Carro(Car *car)
 {
     // pthread_mutex_lock(&mutex);
     // printf("Carro da equipa %d\n", getpid());
     // pthread_mutex_unlock(&mutex);
-    message* my_msg;
+    message *my_msg;
 
     int TotalDistance = lap * dv;
     char message[1000];
@@ -54,14 +54,14 @@ void *Carro(Car* car)
 
     while (TotalDistance > 0)
     {
-        printf("%d\n", TotalDistance);
-        
-        if(msgrcv(msqid,  my_msg, sizeof(my_msg) - sizeof(long), car->model, 0) == -1)
-        {
-            perror("Error: msgrcv()\n");
-            exit(1);
-        }
-        printf("avaria ? -> %d", my_msg->avaria);
+        // printf("%d\n", TotalDistance);
+
+        // if(msgrcv(msqid,  my_msg, sizeof(my_msg) - sizeof(long), car->model, 0) == -1)
+        // {
+        //     perror("Error: msgrcv()\n");
+        //     exit(1);
+        // }
+        // printf("avaria ? -> %d", my_msg->avaria);
 
         TotalDistance -= car->speed;
         sleep(1);
