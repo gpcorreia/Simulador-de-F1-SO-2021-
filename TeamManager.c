@@ -44,24 +44,25 @@ void *Carro(Car *car)
     // pthread_mutex_lock(&mutex);
     // printf("Carro da equipa %d\n", getpid());
     // pthread_mutex_unlock(&mutex);
-    message *my_msg;
+    message my_msg;
 
     int TotalDistance = lap * dv;
-    char message[1000];
+    //char message[1000];
 
     printf("Carro : %d ----- Team %s\n", car->model, car->team);
     printf("O meu Gestor %d\n", getpid());
 
     while (TotalDistance > 0)
     {
-        // printf("%d\n", TotalDistance);
+        printf("%d\n", TotalDistance);
 
-        // if(msgrcv(msqid,  my_msg, sizeof(my_msg) - sizeof(long), car->model, 0) == -1)
-        // {
-        //     perror("Error: msgrcv()\n");
-        //     exit(1);
-        // }
-        // printf("avaria ? -> %d", my_msg->avaria);
+        if(msgrcv(msqid,  &my_msg, sizeof(my_msg) - sizeof(long), car->model, IPC_NOWAIT) == -1)
+        {
+            //perror("Error: msgrcv()\n");
+            //exit(1);
+        }
+        //printf("my_msg -> %ld, %d\n", my_msg.msgtype, my_msg.avaria);
+        //printf("carro -> %d, avaria ? -> %d\n", car->model, my_msg.avaria);
 
         TotalDistance -= car->speed;
         sleep(1);
