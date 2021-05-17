@@ -23,7 +23,7 @@ int p[2];   // file descriptor do unnamed pipe
 int msqid; //message queue id
 
 int shmid;                   //shared memory id
-int shmid2;                  
+int shmidTeams;              //shared memory id
 SHARED_MEMORY *SharedMemory; //shared memory
 Team *teams;                 //Array de equipas
 
@@ -33,4 +33,5 @@ sem_t *mutex_sh;        //mutex for shared memory
 
 pthread_mutex_t mutex; //Mutex para threads
 
+Team *EquipasSHM;
 #endif

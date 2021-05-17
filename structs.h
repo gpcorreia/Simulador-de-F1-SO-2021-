@@ -10,6 +10,7 @@ typedef struct Car
     int model;
     int state; //0-Corrida - 1-Segurança - 2-Box - 3-Desistencia - 4-Terminado
     int speed;
+    int laps;
     float consumption;
     int reliability;
 } Car;
@@ -27,7 +28,6 @@ typedef struct Team
     int Numcars;
     Car cars[2]; //index
     box pitbox;
-    struct Team *next;
 } Team;
 
 typedef struct shared_memory
@@ -42,7 +42,7 @@ typedef struct shared_memory
 typedef struct mq_message
 {
     long msgtype;
-    int avaria;   // 1 -> tem avaria; 0-> nao tem avaria 
+    int avaria; // 1 -> tem avaria; 0-> nao tem avaria
 } message;
 
 #endif

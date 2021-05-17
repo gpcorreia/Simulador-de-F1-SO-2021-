@@ -48,8 +48,8 @@ void RaceManager()
                 infos[0] = '\0';
                 sprintf(infos, "NEW COMMAND RECEIVED: START RACE");
                 writeLog(infos);
-                createTM();
                 // printLista();
+                createTM();
             }
             else if (strcmp(CommandsNP, "START RACE!\n") == 0 && SharedMemory->NumTeams < NumTeam)
             {
@@ -66,15 +66,13 @@ void RaceManager()
                     int speed, reliability, carro;
                     float consumption;
                     sscanf(CommandsNP, "ADDCAR TEAM: %c, CAR: %d, SPEED: %d, CONSUMPTION: %f, RELIABILITY: %d", team, &carro, &speed, &consumption, &reliability);
-                    if (checkCar(carro) != 0)
+                    if (checkCar(carro) == 0)
                     {
-                        printf("a entrar em insereCarro()\n");
-                        insereCarro(team, carro, speed, consumption, reliability);
-                        printf("inserido\n");
+                        writeLog("Car Already exist!");
                     }
                     else
                     {
-                        writeLog("Car Already exist!");
+                        insereCarro(team, carro, speed, consumption, reliability);
                     }
                 }
                 else
@@ -103,11 +101,12 @@ void RaceManager()
 
 void createTM()
 {
-    for(int i=0; i<NumTeam; i++)
+    for (int i = 0; i < SharedMemory->NumTeams; i++)
     {
-        if(fork() == 0)
+        if (fork() == 0)
         {
-            TeamManager(teams[i]);
+            TeamManager(EquipasSHM[i]);
+            sleep(5);
             exit(0);
         }
     }
@@ -128,24 +127,18 @@ int insereCarro(char *team, int carro, int speed, float consumption, int reliabi
         }
         else
         {
-            printf("a inserir\n");
-            Team newTeam;
-
-            strcpy(newTeam.name, team);
-            strcpy(newTeam.cars[newTeam.Numcars].team, team);
-            newTeam.cars[newTeam.Numcars].model = carro;
-            newTeam.cars[newTeam.Numcars].speed = speed;
-            newTeam.cars[newTeam.Numcars].consumption = consumption;
-            newTeam.cars[newTeam.Numcars].reliability = reliability;
-            newTeam.Numcars++;
-
-            teams[SharedMemory->NumTeams] = newTeam;
-
-            SharedMemory->NumTeams++;    
-            //printf("acabei de inserir\n");        
+            strcpy(EquipasSHM[SharedMemory->NumTeams].name, team);
+            strcpy(EquipasSHM[SharedMemory->NumTeams].cars[0].team, team);
+            EquipasSHM[SharedMemory->NumTeams].cars[0].model = carro;
+            EquipasSHM[SharedMemory->NumTeams].cars[0].speed = speed;
+            EquipasSHM[SharedMemory->NumTeams].cars[0].consumption = consumption;
+            EquipasSHM[SharedMemory->NumTeams].cars[0].reliability = reliability;
+            EquipasSHM[SharedMemory->NumTeams].cars[0].laps = 0;
+            EquipasSHM[SharedMemory->NumTeams].cars[0].state = 0;
+            EquipasSHM[SharedMemory->NumTeams].Numcars = 1;
+            SharedMemory->NumTeams++;
         }
     }
-
     if (aux != 2)
     {
         printf("aqui\n");
@@ -161,18 +154,13 @@ int insereCarro(char *team, int carro, int speed, float consumption, int reliabi
 
 void printLista()
 {
-    if(SharedMemory->NumTeams == 0)
-    {
-        printf("Lista de equipas vazia!\n");
-    }
 
-    for(int i=0; i<SharedMemory->NumTeams; i++)
+    for (int i = 0; i < SharedMemory->NumTeams; i++)
     {
-        printf("---------- TEAM %s ----------\n", teams[i].name);
-        for (int i = 0; i < 2; i++)
+        printf("---------- TEAM %s ----------\n", EquipasSHM[i].name);
+        for (int j = 0; j < EquipasSHM[i].Numcars; j++)
         {
-            printf("Carro[%d] = %d\n", i, teams[i].cars[i].model);
-            printf("Carro[%d] = %.2f\n", i, teams[i].cars[i].consumption);
+            printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].model);
         }
     }
 
@@ -180,16 +168,12 @@ void printLista()
 
 int checkCar(int car)
 {
-    if (SharedMemory->NumTeams == 0)
+    for (int i = 0; i < SharedMemory->NumTeams; i++)
     {
-        printf("Lista Vazia\n");
-    }
-
-    for(int i=0; i<SharedMemory->NumTeams; i++)
-    {
-        for (int i = 0; i < teams[i].Numcars; i++)
+        for (int j = 0; j < EquipasSHM[i].Numcars; j++)
         {
-            if (teams[i].cars[i].model == car)
+
+            if (EquipasSHM[i].cars[j].model == car)
             {
                 return 0; //se o carro ja existir
             }
@@ -201,38 +185,39 @@ int checkCar(int car)
 
 int checkTeam(char *team, int carro, int speed, float consumption, int reliability)
 {
-    int k = 1;
-
+    int j = 1;
     if (SharedMemory->NumTeams == 0)
     {
         return 1;
     }
 
-    for (int i = 0 ; i<SharedMemory->NumTeams; i++)
+    for (int i = 0; i < SharedMemory->NumTeams; i++)
     {
-        if (strcmp(team, teams[i].name) == 0)
+        if (strcmp(team, EquipasSHM[i].name) == 0)
         {
-            if (teams[i].Numcars < 2)
+            if (EquipasSHM[i].Numcars < 2)
             {
-                strcpy(teams[i].cars[teams[i].Numcars].team, team);
-                teams[i].cars[teams[i].Numcars].model = carro;
-                teams[i].cars[teams[i].Numcars].speed = speed;
-                teams[i].cars[teams[i].Numcars].consumption = consumption;
-                teams[i].cars[teams[i].Numcars].reliability = reliability;
-                teams[i].Numcars++;
-                k = 0;
+                strcpy(EquipasSHM[i].cars[EquipasSHM[i].Numcars].team, team);
+                EquipasSHM[i].cars[EquipasSHM[i].Numcars].model = carro;
+                EquipasSHM[i].cars[EquipasSHM[i].Numcars].speed = speed;
+                EquipasSHM[i].cars[EquipasSHM[i].Numcars].consumption = consumption;
+                EquipasSHM[i].cars[EquipasSHM[i].Numcars].reliability = reliability;
+                EquipasSHM[i].cars[EquipasSHM[i].Numcars].laps = 0;
+                EquipasSHM[i].cars[EquipasSHM[i].Numcars].state = 0;
+                EquipasSHM[i].Numcars++;
+                j = 0;
                 break;
             }
             else
             {
                 printf("Equipa Cheia\n");
-                k = 2;
+                j = 2;
                 break;
             }
         }
     }
 
-    return k;
+    return j;
 }
 
 int handleCommand(char *commands)
