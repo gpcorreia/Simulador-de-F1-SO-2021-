@@ -34,7 +34,7 @@ void F1simulator() //gestor de corrida("RaceManager") + gestor de Avarias("...")
     {
         while (1)
         {
-            if (SharedMemory->infoRace != 0)
+            if (SharedMemory->infoRace == 1)
             {
                 MalfunctionManager(); // Gestor de Avarias
                 exit(0);
@@ -68,6 +68,21 @@ void init()
         exit(1);
     }
 
+    shmidTeams = shmget(KEY, sizeof(Team) * NumTeam, IPC_CREAT | 0700);
+
+    //attach shared memory
+    if ((SharedMemory->teams = (Team *)shmat(shmid, NULL, 0)) == (Team *)-1)
+    {
+        perror("Shmat error!\n");
+        exit(1);
+    }
+    //init of Shared Memory
+    EquipasSHM = SharedMemory->teams;
+    SharedMemory->infoRace = 0;
+    SharedMemory->NumCars = 0;
+    SharedMemory->FinishCars = 0;
+    SharedMemory->NumTeams = 0;
+
     // criacao dos mutex / semaforos
     sem_unlink(MUTEX_SH); //mutex para semaforo
     mutex_sh = sem_open(MUTEX_SH, O_CREAT | O_EXCL, 0700, 1);
@@ -99,7 +114,7 @@ void init()
         exit(1);
     }
 
-    if((msqid = msgget(IPC_PRIVATE, IPC_CREAT|0777)) == -1)
+    if ((msqid = msgget(IPC_PRIVATE, IPC_CREAT | 0777)) == -1)
     {
         perror("Error: msgget()\n");
         exit(1);
@@ -206,7 +221,7 @@ void closeSimulator()
         exit(1);
     }
 
-    if(msgctl(msqid, IPC_RMID, 0) == -1)
+    if (msgctl(msqid, IPC_RMID, 0) == -1)
     {
         perror("Error: msgctl()\n");
         exit(1);
