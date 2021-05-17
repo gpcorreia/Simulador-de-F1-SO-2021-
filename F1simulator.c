@@ -4,11 +4,11 @@
 #include "structs.h"
 
 void init();
+void CreateShm();
 void ConfigRead();
 void RaceManager();
 void MalfunctionManager();
 void writeLog(char *info);
-void closeSimulator();
 void closeSimulator();
 void PrintStats();
 void endRace();
@@ -59,14 +59,7 @@ void init()
     ConfigRead(); //ler ficheiro de config
 
     //create shared memory
-    shmid = shmget(KEY, sizeof(SHARED_MEMORY), IPC_CREAT | 0700);
-
-    //attach shared memory
-    if ((SharedMemory = (SHARED_MEMORY *)shmat(shmid, NULL, 0)) == (SHARED_MEMORY *)-1)
-    {
-        perror("Shmat error!\n");
-        exit(1);
-    }
+    CreateShm();
 
     // criacao dos mutex / semaforos
     sem_unlink(MUTEX_SH); //mutex para semaforo
@@ -107,6 +100,35 @@ void init()
 
     printf("----Program Started----\n");
     writeLog("SIMULATOR STARTING");
+}
+
+void CreateShm()
+{
+    if((shmid = shmget(IPC_PRIVATE, sizeof(SHARED_MEMORY), IPC_CREAT | 0700)) == -1)
+    {
+        perror("Error: shmget()\n");
+        exit(1);
+    }
+
+    if ((SharedMemory = (SHARED_MEMORY *)shmat(shmid, NULL, 0)) == (SHARED_MEMORY *)-1)
+    {
+        perror("Shmat error!\n");
+        exit(1);
+    }
+
+    if((shmid2 = shmget(IPC_PRIVATE, sizeof(Team)*NumTeam, IPC_CREAT | 0700)) == -1)
+    {
+        perror("Error: shmget()\n");
+        exit(1);
+    }
+
+    if ((SharedMemory->HeadTeams = (Team *)shmat(shmid2, NULL, 0)) == (Team *)-1)
+    {
+        perror("Shmat error!\n");
+        exit(1);
+    }
+
+    teams = SharedMemory->HeadTeams;
 }
 
 void ConfigRead()
@@ -168,6 +190,20 @@ void closeSimulator()
 
     //Destruição da memoria partilhada
     if (shmctl(shmid, IPC_RMID, NULL) != 0)
+    {
+        perror("Erro ao destruir a memoria partilhada.\n");
+        exit(1);
+    }
+
+    //desattach da memória partilhada
+    if (shmdt(teams) == -1)
+    {
+        perror("Erro shmdt.\n");
+        exit(1);
+    }
+
+    //Destruição da memoria partilhada
+    if (shmctl(shmid2, IPC_RMID, NULL) != 0)
     {
         perror("Erro ao destruir a memoria partilhada.\n");
         exit(1);

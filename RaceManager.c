@@ -68,7 +68,9 @@ void RaceManager()
                     sscanf(CommandsNP, "ADDCAR TEAM: %c, CAR: %d, SPEED: %d, CONSUMPTION: %f, RELIABILITY: %d", team, &carro, &speed, &consumption, &reliability);
                     if (checkCar(carro) != 0)
                     {
+                        printf("a entrar em insereCarro()\n");
                         insereCarro(team, carro, speed, consumption, reliability);
+                        printf("inserido\n");
                     }
                     else
                     {
@@ -90,7 +92,7 @@ void RaceManager()
         // if (write(p[1], &ola, sizeof(ola)) != 0)
         // {
         //     printf("%s\n", stateTM);
-        // }
+        // }s
     }
 
     for (int i = 0; i < NumTeam; i++)
@@ -101,24 +103,19 @@ void RaceManager()
 
 void createTM()
 {
-    Team *teamsAx = SharedMemory->teams;
-
-    while (teamsAx != NULL)
+    for(int i=0; i<NumTeam; i++)
     {
-
-        if (fork() == 0)
+        if(fork() == 0)
         {
-            TeamManager(teamsAx);
-            sleep(5);
+            TeamManager(teams[i]);
             exit(0);
         }
-
-        teamsAx = teamsAx->next;
     }
 }
 
 int insereCarro(char *team, int carro, int speed, float consumption, int reliability)
 {
+    printf("a entrar em checkTeam()\n");
     int aux = checkTeam(team, carro, speed, consumption, reliability);
 
     if (aux == 1) // nao existe equipa
@@ -131,37 +128,32 @@ int insereCarro(char *team, int carro, int speed, float consumption, int reliabi
         }
         else
         {
+            printf("a inserir\n");
+            Team newTeam;
 
-            Team *novoNo;
+            strcpy(newTeam.name, team);
+            strcpy(newTeam.cars[newTeam.Numcars].team, team);
+            newTeam.cars[newTeam.Numcars].model = carro;
+            newTeam.cars[newTeam.Numcars].speed = speed;
+            newTeam.cars[newTeam.Numcars].consumption = consumption;
+            newTeam.cars[newTeam.Numcars].reliability = reliability;
+            newTeam.Numcars++;
 
-            novoNo = (Team *)malloc(sizeof(Team));
+            teams[SharedMemory->NumTeams] = newTeam;
 
-            if (novoNo == NULL)
-            {
-                printf("Memoria Cheia !\n");
-                return 1;
-            }
-            novoNo->next = NULL;
-            novoNo->Numcars = 0;
-
-            strcpy(novoNo->name, team);
-            strcpy(novoNo->cars[novoNo->Numcars].team, team);
-            novoNo->cars[novoNo->Numcars].model = carro;
-            novoNo->cars[novoNo->Numcars].speed = speed;
-            novoNo->cars[novoNo->Numcars].consumption = consumption;
-            novoNo->cars[novoNo->Numcars].reliability = reliability;
-            novoNo->Numcars++;
-            novoNo->next = SharedMemory->teams;
-            SharedMemory->teams = novoNo;
-            SharedMemory->NumTeams++;
+            SharedMemory->NumTeams++;    
+            //printf("acabei de inserir\n");        
         }
     }
 
     if (aux != 2)
     {
+        printf("aqui\n");
         char info[1000];
         sprintf(info, "NEW CAR LOADED => TEAM: %s, CAR: %d, SPEED: %d, CONSUMPTION: %f, RELIABILITY: %d", team, carro, speed, consumption, reliability);
-        writeLog(info);
+        printf("aqui2\n");
+        //writeLog(info);
+        printf("dps do aqui\n");
     }
 
     return 0;
@@ -169,44 +161,39 @@ int insereCarro(char *team, int carro, int speed, float consumption, int reliabi
 
 void printLista()
 {
-    Team *proximo = SharedMemory->teams;
-
-    if (proximo == NULL)
+    if(SharedMemory->NumTeams == 0)
     {
-        printf("Lista Vazia\n");
+        printf("Lista de equipas vazia!\n");
     }
 
-    while (proximo != NULL)
+    for(int i=0; i<SharedMemory->NumTeams; i++)
     {
-        printf("---------- TEAM %s ----------\n", proximo->name);
+        printf("---------- TEAM %s ----------\n", teams[i].name);
         for (int i = 0; i < 2; i++)
         {
-            printf("Carro[%d] = %d\n", i, proximo->cars[i].model);
-            printf("Carro[%d] = %.2f\n", i, proximo->cars[i].consumption);
+            printf("Carro[%d] = %d\n", i, teams[i].cars[i].model);
+            printf("Carro[%d] = %.2f\n", i, teams[i].cars[i].consumption);
         }
-        proximo = proximo->next;
     }
+
 }
 
 int checkCar(int car)
 {
-    Team *proximo = SharedMemory->teams;
-
-    if (proximo == NULL)
+    if (SharedMemory->NumTeams == 0)
     {
         printf("Lista Vazia\n");
     }
 
-    while (proximo != NULL)
+    for(int i=0; i<SharedMemory->NumTeams; i++)
     {
-        for (int i = 0; i < proximo->Numcars; i++)
+        for (int i = 0; i < teams[i].Numcars; i++)
         {
-            if (proximo->cars[i].model == car)
+            if (teams[i].cars[i].model == car)
             {
                 return 0; //se o carro ja existir
             }
         }
-        proximo = proximo->next;
     }
 
     return 1; //se o carro nao existir
@@ -214,42 +201,38 @@ int checkCar(int car)
 
 int checkTeam(char *team, int carro, int speed, float consumption, int reliability)
 {
+    int k = 1;
 
-    Team *proximo = SharedMemory->teams;
-    int i = 1;
-
-    if (proximo == NULL)
+    if (SharedMemory->NumTeams == 0)
     {
         return 1;
     }
 
-    while (proximo != NULL)
+    for (int i = 0 ; i<SharedMemory->NumTeams; i++)
     {
-        if (strcmp(team, proximo->name) == 0)
+        if (strcmp(team, teams[i].name) == 0)
         {
-            if (proximo->Numcars < 2)
+            if (teams[i].Numcars < 2)
             {
-                strcpy(proximo->cars[proximo->Numcars].team, team);
-                proximo->cars[proximo->Numcars].model = carro;
-                proximo->cars[proximo->Numcars].speed = speed;
-                proximo->cars[proximo->Numcars].consumption = consumption;
-                proximo->cars[proximo->Numcars].reliability = reliability;
-                proximo->Numcars++;
-                i = 0;
+                strcpy(teams[i].cars[teams[i].Numcars].team, team);
+                teams[i].cars[teams[i].Numcars].model = carro;
+                teams[i].cars[teams[i].Numcars].speed = speed;
+                teams[i].cars[teams[i].Numcars].consumption = consumption;
+                teams[i].cars[teams[i].Numcars].reliability = reliability;
+                teams[i].Numcars++;
+                k = 0;
                 break;
             }
             else
             {
                 printf("Equipa Cheia\n");
-                i = 2;
+                k = 2;
                 break;
             }
         }
-
-        proximo = proximo->next;
     }
 
-    return i;
+    return k;
 }
 
 int handleCommand(char *commands)

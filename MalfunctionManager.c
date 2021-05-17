@@ -39,29 +39,31 @@ void MalfunctionManager()
 //retorna 0 se nao tiver avaria e 1 se tiver
 int gera_avarias(int reliability)
 {
-    int isAvaria=0; 
-    isAvaria = 1;
-    return isAvaria;
+    int isAvaria = rand() % 100;
+    if(isAvaria >= reliability)
+    {
+        return 1;
+    }
+    return 0;
 }
 
 int notificaCarros()
 {
-    Team *proximo = SharedMemory->teams;
     int auxAvaria;
     message* msg;
 
-    if (proximo == NULL)
+    if (SharedMemory->NumTeams)
     {
-        printf("Lista Vazia\n");
+        printf("Lista de equipas vazia\n");
     }
 
-    while (proximo != NULL)
+    for (int i=0; i<SharedMemory->NumTeams; i++)
     {
-        for(int i=0; i<proximo->Numcars; i++)
+        for(int i=0; i<teams[i].Numcars; i++)
         {
             //gera a avaria (ou nao)
-            auxAvaria = gera_avarias(proximo->cars[i].reliability);
-            msg->msgtype=proximo->cars[i].model;
+            auxAvaria = gera_avarias(teams[i].cars[i].reliability);
+            msg->msgtype=teams[i].cars[i].model;
             msg->avaria=auxAvaria;
             
             //notifica o carro
@@ -72,7 +74,6 @@ int notificaCarros()
             }
             
         }
-        proximo = proximo->next;
     }
     return 0;
 }

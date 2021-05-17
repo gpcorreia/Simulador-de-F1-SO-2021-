@@ -36,8 +36,7 @@ typedef struct shared_memory
     int NumCars;
     int FinishCars;
     int NumTeams;
-    Team *teams; //lista ligada de equipas
-
+    Team* HeadTeams;
 } SHARED_MEMORY;
 
 typedef struct mq_message
