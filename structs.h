@@ -13,7 +13,7 @@ typedef struct Car
     int laps;
     float consumption;
     int reliability;
-    int totalBox;
+    int totalBox; //numero de entradas na box
 } Car;
 
 typedef struct indices
@@ -44,6 +44,7 @@ typedef struct shared_memory
     int FinishCars;
     int desistencias;
     int NumTeams;
+    int totalAbastecimentos;
     int totalAvarias;
     Team *teams; //lista ligada de equipas
 

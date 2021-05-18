@@ -61,8 +61,9 @@ int notificaCarros()
             {
                 sem_wait(mutex_sh);
                 SharedMemory->totalAvarias++,
-                    sem_post(mutex_sh);
+                sem_post(mutex_sh);
             }
+            
             //notifica o carro
             if (msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1)
             {

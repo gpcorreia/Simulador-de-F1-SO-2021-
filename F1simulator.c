@@ -10,18 +10,19 @@ void MalfunctionManager();
 void writeLog(char *info);
 void closeSimulator();
 void closeSimulator();
+int getTop5Cars(Car array[]);
 void PrintStats();
 void endRace();
 
 void F1simulator() //gestor de corrida("RaceManager") + gestor de Avarias("...")
 {
+
     init();
 
     printf("F1 Simulator %d \n", getpid());
 
     pid_t pid, pid2;
 
-    signal(SIGTSTP, PrintStats);
     signal(SIGINT, endRace);
 
     if ((pid = fork()) == 0)
@@ -43,7 +44,7 @@ void F1simulator() //gestor de corrida("RaceManager") + gestor de Avarias("...")
     }
     else
     {
-
+        signal(SIGTSTP, PrintStats);
         printf("\nF1 Simulator %d \n", getpid());
     }
 
@@ -56,8 +57,10 @@ void F1simulator() //gestor de corrida("RaceManager") + gestor de Avarias("...")
 void init()
 {
     ConfigRead(); //ler ficheiro de config
+
     //create shared memory
     shmid = shmget(IPC_PRIVATE, sizeof(SHARED_MEMORY), IPC_CREAT | 0700);
+
     //attach shared memory
     if ((SharedMemory = (SHARED_MEMORY *)shmat(shmid, NULL, 0)) == (SHARED_MEMORY *)-1)
     {
@@ -66,7 +69,7 @@ void init()
     }
 
     shmidTeams = shmget(IPC_PRIVATE, sizeof(Team) * NumTeam, IPC_CREAT | 0700);
-    printf("d\n");
+   
     //attach shared memory
     if ((SharedMemory->teams = (Team *)shmat(shmidTeams, NULL, 0)) == (Team *)-1)
     {
@@ -162,6 +165,16 @@ void ConfigRead()
 void PrintStats()
 {
     printf("Escrevendo Estatisticas\n");
+
+    //Top5 carros tendo em conta o numero de voltas completas
+    int top;
+    Car top5[TOP];
+    top = getTop5Cars(top5);
+    printf("TOP 5\n");
+    for(int i=0; i<top; i++)
+    {
+        printf("\t=>CAR: %d | TEAM: %s | LAPS: %d | BOX: %d\n", top5[i].model, top5[i].team, top5[i].laps, top5[i].totalBox);
+    }   
 }
 
 void endRace()
