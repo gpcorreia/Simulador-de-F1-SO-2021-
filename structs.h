@@ -13,6 +13,7 @@ typedef struct Car
     int laps;
     float consumption;
     int reliability;
+    int totalBox;
 } Car;
 
 typedef struct PitBox //Box das equipas

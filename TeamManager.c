@@ -26,10 +26,10 @@ void TeamManager(Team teamsAx)
 
     //sleep(5); //simular codigo a correr
     //leitura();
-    while (teamsAx.FinishCars != teamsAx.Numcars)
-    {
-        if (teamsAx.cars[i])
-    }
+    // while (teamsAx.FinishCars != teamsAx.Numcars)
+    // {
+    //     if (teamsAx.cars[i])
+    // }
     //Esperar que todas as threads terminem
     for (int i = 0; i < NumCars; i++)
     {
@@ -51,31 +51,24 @@ void *Carro(Car *car)
 
     int TotalDistance = lap * dv;
     int combustivel = oilcap;
-    char message[1000];
     int fourLaps = 4 * dv;
     int twoLaps = 2 * dv;
-    int time;
     printf("Carro : %d ----- Team %s\n", car->model, car->team);
     printf("O meu Gestor %d\n", getpid());
 
     while (TotalDistance > 0)
     {
-        printf("%d\n", TotalDistance);
+        msgrcv(msqid, &my_msg, sizeof(my_msg) - sizeof(long), car->model, IPC_NOWAIT);
 
-        if (msgrcv(msqid, &my_msg, sizeof(my_msg) - sizeof(long), car->model, IPC_NOWAIT) == -1)
-        {
-            //perror("Error: msgrcv()\n");
-            //exit(1);
-        }
         //printf("my_msg -> %ld, %d\n", my_msg.msgtype, my_msg.avaria);
         //printf("carro -> %d, avaria ? -> %d\n", car->model, my_msg.avaria);
-        if (my_msg->avaria == 1)
+        if (my_msg.avaria == 1)
         {
             for (int i = 0; i < SharedMemory->NumTeams; i++)
             {
                 for (int j = 0; j < EquipasSHM[i].Numcars; j++)
                 {
-                    if (strcmp(EquipasSHM[i].cars[j].model, car->model) == 0)
+                    if (EquipasSHM[i].cars[j].model == car->model)
                     {
                         EquipasSHM[i].cars[j].state = 1;
                         car->state = 1;
@@ -117,7 +110,7 @@ void *Carro(Car *car)
             {
                 for (int j = 0; j < EquipasSHM[i].Numcars; j++)
                 {
-                    if (strcmp(EquipasSHM[i].cars[j].model, car->model) == 0)
+                    if (EquipasSHM[i].cars[j].model == car->model)
                     {
                         EquipasSHM[i].cars[j].state = 1;
                         car->state = 1;
@@ -125,8 +118,6 @@ void *Carro(Car *car)
                 }
             }
         }
-        //AVaria = modo seguranca
-        //Se tiver em modo segurança
         if (car->state == 1)
         {
             TotalDistance -= 0.3 * car->speed;
@@ -137,6 +128,7 @@ void *Carro(Car *car)
             TotalDistance -= car->speed;
             combustivel -= car->consumption;
         }
+
         sleep(1);
     }
 
