@@ -134,6 +134,7 @@ int insereCarro(char *team, int carro, int speed, float consumption, int reliabi
             EquipasSHM[SharedMemory->NumTeams].cars[0].reliability = reliability;
             EquipasSHM[SharedMemory->NumTeams].cars[0].laps = 0;
             EquipasSHM[SharedMemory->NumTeams].cars[0].state = 0;
+            EquipasSHM[SharedMemory->NumTeams].cars[0].oilcap = oilcap;
             EquipasSHM[SharedMemory->NumTeams].Numcars = 1;
             SharedMemory->NumTeams++;
         }
@@ -198,6 +199,7 @@ int checkTeam(char *team, int carro, int speed, float consumption, int reliabili
                 EquipasSHM[i].cars[EquipasSHM[i].Numcars].reliability = reliability;
                 EquipasSHM[i].cars[EquipasSHM[i].Numcars].laps = 0;
                 EquipasSHM[i].cars[EquipasSHM[i].Numcars].state = 0;
+                EquipasSHM[i].cars[EquipasSHM[i].Numcars].oilcap = oilcap;
                 EquipasSHM[i].Numcars++;
                 j = 0;
                 break;
@@ -214,15 +216,15 @@ int checkTeam(char *team, int carro, int speed, float consumption, int reliabili
     return j;
 }
 
-//retorna o numero de 
+//retorna o numero de
 int getTop5Cars(Car array[])
 {
     //mete dentro do array todos os carros que participam na corrida
-    Car allCars[NumTeam*NumCars];
-    int t, i, j, k=0;
-    for(i=0; i<SharedMemory->NumTeams; i++)
+    Car allCars[NumTeam * NumCars];
+    int t, i, j, k = 0;
+    for (i = 0; i < SharedMemory->NumTeams; i++)
     {
-        for(j=0; j<EquipasSHM[i].Numcars; j++)
+        for (j = 0; j < EquipasSHM[i].Numcars; j++)
         {
             allCars[k] = EquipasSHM[i].cars[j];
             //printf("%d\n", EquipasSHM[i].cars[j].model);
@@ -236,15 +238,15 @@ int getTop5Cars(Car array[])
     {
         printf("%d %d\n", array[i].model, array[i].laps);
     }  */
-    
+
     //ordenar e retirar os 5 primeiros
 
     Car aux;
-    for(i=0; i<k; i++)
+    for (i = 0; i < k; i++)
     {
-        for(j=0; j<k; j++)
+        for (j = 0; j < k; j++)
         {
-            if(allCars[i].model > allCars[j].model)
+            if (allCars[i].model > allCars[j].model)
             {
                 aux = allCars[j];
                 allCars[j] = allCars[i];
@@ -262,7 +264,7 @@ int getTop5Cars(Car array[])
         t = TOP;
     }
 
-    for (i=0; i<t; i++)
+    for (i = 0; i < t; i++)
     {
         array[i] = allCars[i];
     }
