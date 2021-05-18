@@ -10,7 +10,7 @@ void MalfunctionManager();
 void writeLog(char *info);
 void closeSimulator();
 void closeSimulator();
-int getTop5Cars(Car array[]);
+void getTop5Cars(char *message);
 void PrintStats();
 void endRace();
 
@@ -166,21 +166,95 @@ void PrintStats()
 {
     printf("Escrevendo Estatisticas\n");
 
-    //Top5 carros tendo em conta o numero de voltas completas
-    int top;
-    Car top5[TOP];
-    top = getTop5Cars(top5);
-    printf("TOP 5\n");
-    for(int i=0; i<top; i++)
-    {
-        printf("\t=>CAR: %d | TEAM: %s | LAPS: %d | BOX: %d\n", top5[i].model, top5[i].team, top5[i].laps, top5[i].totalBox);
-    }   
+    //Top5 carros tendo em conta o numero de voltas completas; Carro em ultimo lugar
+    char top5cars[1024];
+    getTop5Cars(top5cars);
+
+    //Carro em ultimo lugar
+
+    //Total de avarias
+
+    //Total de abastecimentos
+
+    //Total de avarias
+
+    //Numero de carros em pista   
 }
 
 void endRace()
 {
     closeSimulator();
     writeLog("SIMULATOR CLOSING\n");
+}
+
+void getTop5Cars(char *message)
+{
+    //mete dentro do array todos os carros que participam na corrida
+    Car allCars[NumTeam*NumCars];
+    int t, i, j, k=0;
+    Car aux;
+    Car last = EquipasSHM[0].cars[0];
+    char aux2[1024];
+    int Maxdist = 0;
+
+    for(i=0; i<SharedMemory->NumTeams; i++)
+    {
+        for (j = 0; j < EquipasSHM[i].Numcars; j++)
+        {
+            allCars[k] = EquipasSHM[i].cars[j];
+            //printf("%d\n", EquipasSHM[i].cars[j].model);
+            //printf("%d\n", array[k].model);
+            if(EquipasSHM[i].cars[j].distance2finish > Maxdist)
+            {
+                Maxdist = EquipasSHM[i].cars[j].distance2finish;
+                last = EquipasSHM[i].cars[j];
+            }
+            k++;
+        }
+    }
+
+    // printf("k: %d\n", k);
+    /* for(i=0; i<k; i++)
+    {
+        printf("%d %d\n", array[i].model, array[i].laps);
+    }  */
+    
+
+    //ordenar e retirar os 5 primeiros
+    for(i=0; i<k; i++)
+    {
+        for (j = 0; j < k; j++)
+        {
+            if (allCars[i].laps > allCars[j].laps)
+            {
+                aux = allCars[j];
+                allCars[j] = allCars[i];
+                allCars[i] = aux;
+            }
+        }
+    }
+
+    if (k < TOP)
+    {
+        t = k;
+    }
+    else
+    {
+        t = TOP;
+    }
+
+    writeLog("TOP 5");
+
+    for(int i=0; i<t; i++)
+    {
+        sprintf(aux2, "=>CAR: %d | TEAM: %s | LAPS: %d | BOX: %d", allCars[i].model, allCars[i].team, allCars[i].laps, allCars[i].totalBox);
+        writeLog(aux2);
+    } 
+
+    writeLog("CARRO EM ULTIMO LUGAR");
+    sprintf(aux2, "=>CAR: %d | TEAM: %s | LAPS: %d | BOX: %d", last.model, last.team, last.laps, last.totalBox);
+    writeLog(aux2);
+
 }
 
 //eliminar todos  os recursos requisitados pelos processos (semaforos, memorias partilhadas...)

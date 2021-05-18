@@ -123,12 +123,14 @@ void *Carro(inx *aux)
         if (EquipasSHM[aux->team].cars[aux->car].state == 1)
         {
             TotalDistance -= 0.3 * EquipasSHM[aux->team].cars[aux->car].speed;
+            EquipasSHM[aux->team].cars[aux->car].distance2finish = TotalDistance;
             EquipasSHM[aux->team].cars[aux->car].oilcap -= 0.4 * EquipasSHM[aux->team].cars[aux->car].consumption;
         }
 
         if (EquipasSHM[aux->team].cars[aux->car].state == 0)
         {
             TotalDistance -= EquipasSHM[aux->team].cars[aux->car].speed;
+            EquipasSHM[aux->team].cars[aux->car].distance2finish = TotalDistance;
             EquipasSHM[aux->team].cars[aux->car].oilcap -= EquipasSHM[aux->team].cars[aux->car].consumption;
         }
         //printf("Total Avarias: %d\n", SharedMemory->totalAvarias);
