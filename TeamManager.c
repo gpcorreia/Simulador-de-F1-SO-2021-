@@ -5,6 +5,7 @@
 
 void *Carro();
 void leitura();
+void FixCar(Car car);
 
 void TeamManager(int indice)
 {
@@ -30,11 +31,21 @@ void TeamManager(int indice)
 
     //sleep(5); //simular codigo a correr
     //leitura();
-    // while (teamsAx.FinishCars != teamsAx.Numcars)
-    // {
-    //     if (teamsAx.cars[i])
-    // }
+    while (EquipasSHM[aux.team].FinishCars != EquipasSHM[aux.team].Numcars)
+    {
+
+        for (int i = 0; i < EquipasSHM[aux.team].Numcars; i++)
+        {
+            if (EquipasSHM[aux.team].pitbox.car == EquipasSHM[aux.team].cars[i].model)
+            {
+                EquipasSHM[aux.team].pitbox.state = 1;
+                FixCar(EquipasSHM[aux.team].cars[i]);
+                EquipasSHM[aux.team].pitbox.state = 0;
+            }
+        }
+    }
     //Esperar que todas as threads terminem
+
     for (int i = 0; i < NumCars; i++)
     {
         if (pthread_join(tid[i], NULL) != 0)
@@ -43,6 +54,13 @@ void TeamManager(int indice)
             exit(1);
         }
     }
+}
+
+void FixCar(Car car)
+{
+
+    car.state = 0;
+    car.totalBox++;
 }
 
 //Car thread
@@ -64,11 +82,11 @@ void *Carro(inx aux)
     {
         msgrcv(msqid, &my_msg, sizeof(my_msg) - sizeof(long), EquipasSHM[aux.team].cars[aux.car].model, IPC_NOWAIT);
 
-        //printf("my_msg -> %ld, %d\n", my_msg.msgtype, my_msg.avaria);
-        //printf("carro -> %d, avaria ? -> %d\n", EquipasSHM[aux.team].cars[aux.car].model, my_msg.avaria);
+        printf("my_msg -> %ld, %d\n", my_msg.msgtype, my_msg.avaria);
+        printf("carro -> %d, avaria ? -> %d\n", EquipasSHM[aux.team].cars[aux.car].model, my_msg.avaria);
         if (my_msg.avaria == 1)
         {
-
+            printf("Avaria no Carro %d MODO SAFE ON!!", EquipasSHM[aux.team].cars[aux.car].model);
             EquipasSHM[aux.team].cars[aux.car].state = 1;
         }
 
@@ -85,19 +103,19 @@ void *Carro(inx aux)
         else if (((combustivel - (fourLaps * EquipasSHM[aux.team].cars[aux.car].consumption) / EquipasSHM[aux.team].cars[aux.car].speed) <= 0) && EquipasSHM[aux.team].cars[aux.car].state == 0)
         {
             //começar a entrar na box
+            printf("Carro %d tentando entrar na box!!", EquipasSHM[aux.team].cars[aux.car].model);
+
             if (EquipasSHM[aux.team].pitbox.state == 0)
             {
+                printf("Carro %d entrou na box!!", EquipasSHM[aux.team].cars[aux.car].model);
                 EquipasSHM[aux.team].pitbox.car = EquipasSHM[aux.team].cars[aux.car].model;
                 EquipasSHM[aux.team].pitbox.state = 2;
-            }
-            else if (EquipasSHM[aux.team].pitbox.state == 1)
-            {
-                //entrar na box
             }
         }
 
         else if (((combustivel - (twoLaps * EquipasSHM[aux.team].cars[aux.car].consumption) / EquipasSHM[aux.team].cars[aux.car].speed) <= 0) && EquipasSHM[aux.team].cars[aux.car].state == 0)
         {
+            printf("Carro %d LOW FUEL (SECURTIY MODE ACTiVATED!!", EquipasSHM[aux.team].cars[aux.car].model);
             EquipasSHM[aux.team].cars[aux.car].state = 1;
         }
 
@@ -107,7 +125,7 @@ void *Carro(inx aux)
             combustivel -= 0.4 * EquipasSHM[aux.team].cars[aux.car].consumption;
         }
 
-        if (EquipasSHM[aux.team].cars[aux.car].state)
+        if (EquipasSHM[aux.team].cars[aux.car].state == 0)
         {
             TotalDistance -= EquipasSHM[aux.team].cars[aux.car].speed;
             combustivel -= EquipasSHM[aux.team].cars[aux.car].consumption;
