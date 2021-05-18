@@ -15,7 +15,6 @@ void endRace();
 
 void F1simulator() //gestor de corrida("RaceManager") + gestor de Avarias("...")
 {
-
     init();
 
     printf("F1 Simulator %d \n", getpid());
@@ -57,10 +56,8 @@ void F1simulator() //gestor de corrida("RaceManager") + gestor de Avarias("...")
 void init()
 {
     ConfigRead(); //ler ficheiro de config
-
     //create shared memory
     shmid = shmget(IPC_PRIVATE, sizeof(SHARED_MEMORY), IPC_CREAT | 0700);
-
     //attach shared memory
     if ((SharedMemory = (SHARED_MEMORY *)shmat(shmid, NULL, 0)) == (SHARED_MEMORY *)-1)
     {
@@ -69,7 +66,7 @@ void init()
     }
 
     shmidTeams = shmget(IPC_PRIVATE, sizeof(Team) * NumTeam, IPC_CREAT | 0700);
-   
+    printf("d\n");
     //attach shared memory
     if ((SharedMemory->teams = (Team *)shmat(shmidTeams, NULL, 0)) == (Team *)-1)
     {
@@ -82,6 +79,8 @@ void init()
     SharedMemory->NumCars = 0;
     SharedMemory->FinishCars = 0;
     SharedMemory->NumTeams = 0;
+    SharedMemory->desistencias = 0;
+    SharedMemory->totalAvarias = 0;
 
     // criacao dos mutex / semaforos
     sem_unlink(MUTEX_SH); //mutex para semaforo

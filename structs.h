@@ -16,6 +16,12 @@ typedef struct Car
     int totalBox;
 } Car;
 
+typedef struct indices
+{
+    int team;
+    int car;
+} inx;
+
 typedef struct PitBox //Box das equipas
 {
     int state; //0 - disponivel; 1 - ocupada; 2 - reservada;
@@ -38,6 +44,7 @@ typedef struct shared_memory
     int FinishCars;
     int desistencias;
     int NumTeams;
+    int totalAvarias;
     Team *teams; //lista ligada de equipas
 
 } SHARED_MEMORY;

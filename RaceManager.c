@@ -105,8 +105,7 @@ void createTM()
     {
         if (fork() == 0)
         {
-            TeamManager(EquipasSHM[i]);
-            sleep(5);
+            TeamManager(i);
             exit(0);
         }
     }
