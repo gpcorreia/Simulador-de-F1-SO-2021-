@@ -6,10 +6,11 @@
 void *Carro();
 void leitura();
 void FixCar(Car car);
+void printLista();
 
 void TeamManager(int indice)
 {
-    printf("A minha Equipa é %d\n", getpid());
+    // printf("A minha Equipa é %d\n", getpid());
     // printf("O meu pai é %d\n", getppid());
 
     //Criar threads dos carros
@@ -18,7 +19,7 @@ void TeamManager(int indice)
     pthread_t tid[NumCars]; //thread id
     pthread_mutex_init(&mutex, NULL);
     aux.team = indice;
-
+    // printLista();
     for (int i = 0; i < EquipasSHM[aux.team].Numcars; i++)
     {
         aux.car = i;
@@ -41,7 +42,6 @@ void TeamManager(int indice)
             {
                 EquipasSHM[aux.team].pitbox.state = 1;
                 FixCar(EquipasSHM[aux.team].cars[i]);
-                printf("Carro %d | Team %s a sair da pitbox!! ");
                 EquipasSHM[aux.team].pitbox.state = 0;
             }
         }
@@ -65,6 +65,7 @@ void FixCar(Car car)
     car.state = 0;
     car.totalBox++;
     car.oilcap = oilcap;
+    car.checkBox = 0;
     sleep(time);
 }
 
@@ -81,8 +82,8 @@ void *Carro(inx *aux)
     int fourLaps = 4 * dv;
     int twoLaps = 2 * dv;
     EquipasSHM[aux->team].cars[aux->car].state = 0;
-    printf("Carro : %d ----- Team %s\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
-    printf("O meu Gestor %d\n", getpid());
+    // printf("Carro : %d ----- Team %s\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
+    // printf("O meu Gestor %d\n", getpid());
 
     while (TotalDistance > 0)
     {
@@ -102,7 +103,7 @@ void *Carro(inx *aux)
                 EquipasSHM[aux->team].cars[aux->car].state = 1;
             }
 
-            else if (EquipasSHM[aux->team].cars[aux->car].consumption == 0)
+            else if (EquipasSHM[aux->team].cars[aux->car].oilcap == 0)
             {
                 sem_wait(mutex_sh);
                 SharedMemory->desistencias++;
@@ -122,7 +123,16 @@ void *Carro(inx *aux)
                     printf("Carro %d entrou na box!!\n", EquipasSHM[aux->team].cars[aux->car].model);
                     EquipasSHM[aux->team].pitbox.car = EquipasSHM[aux->team].cars[aux->car].model;
                     EquipasSHM[aux->team].pitbox.state = 2;
+                    EquipasSHM[aux->team].cars[aux->car].checkBox = 1;
                 }
+                if (EquipasSHM[aux->team].pitbox.state == 1)
+                {
+                    printf("Carro %d à espera de entrar na box!!", EquipasSHM[aux->team].cars[aux->car].model);
+                }
+            }
+            else if (((EquipasSHM[aux->team].cars[aux->car].oilcap - (twoLaps * EquipasSHM[aux->team].cars[aux->car].consumption) / EquipasSHM[aux->team].cars[aux->car].speed) <= 0) && EquipasSHM[aux->team].cars[aux->car].state == 0)
+            {
+                EquipasSHM[aux->team].cars[aux->car].state = 1;
             }
 
             if (EquipasSHM[aux->team].cars[aux->car].state == 1)
@@ -139,26 +149,26 @@ void *Carro(inx *aux)
                 EquipasSHM[aux->team].cars[aux->car].oilcap -= EquipasSHM[aux->team].cars[aux->car].consumption;
             }
         }
-
-        if (SharedMemory->FinishCars == 0)
-        {
-            printf("Carro : %d ----- Team %s -> Ganhou a Corrida!!\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
-            SharedMemory->FinishCars++;
-        }
-        else
-        {
-            printf("Carro : %d ----- Team %s -> Terminou a Corrida!!\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
-            SharedMemory->FinishCars++;
-        }
-
-        pthread_exit(NULL);
-        return NULL;
     }
-
-    void leitura()
+    if (SharedMemory->FinishCars == 0)
     {
-        char stateTM[MAX_CHAR_NAMES];
-        sem_wait(mutex_up);
-        read(p[0], &stateTM, sizeof(stateTM));
-        sem_post(mutex_up);
+        printf("Carro : %d ----- Team %s -> Ganhou a Corrida!!\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
+        SharedMemory->FinishCars++;
     }
+    else if (SharedMemory->FinishCars != 0 && EquipasSHM[aux->team].cars[aux->car].state != 3)
+    {
+        printf("Carro : %d ----- Team %s -> Terminou a Corrida!!\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
+        EquipasSHM[aux->team].cars[aux->car].state = 4;
+        SharedMemory->FinishCars++;
+    }
+    pthread_exit(NULL);
+    return NULL;
+}
+
+void leitura()
+{
+    char stateTM[MAX_CHAR_NAMES];
+    sem_wait(mutex_up);
+    read(p[0], &stateTM, sizeof(stateTM));
+    sem_post(mutex_up);
+}

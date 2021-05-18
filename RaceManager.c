@@ -159,6 +159,12 @@ void printLista()
         for (int j = 0; j < EquipasSHM[i].Numcars; j++)
         {
             printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].model);
+            printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].oilcap);
+            printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].state);
+            printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].checkBox);
+            printf("Carro[%d] = %f\n", j, EquipasSHM[i].cars[j].consumption);
+            printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].reliability);
+            printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].totalBox);
         }
     }
 }
