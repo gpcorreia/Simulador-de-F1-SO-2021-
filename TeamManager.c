@@ -54,6 +54,7 @@ void *Carro(Car *car)
 
     while (TotalDistance > 0)
     {
+        my_msg.avaria = 0;
         printf("%d\n", TotalDistance);
 
         if(msgrcv(msqid,  &my_msg, sizeof(my_msg) - sizeof(long), car->model, IPC_NOWAIT) == -1)
@@ -63,6 +64,14 @@ void *Carro(Car *car)
         }
         //printf("my_msg -> %ld, %d\n", my_msg.msgtype, my_msg.avaria);
         //printf("carro -> %d, avaria ? -> %d\n", car->model, my_msg.avaria);
+
+        if(my_msg.avaria == 1)
+        {
+            sem_wait(mutex_sh);
+            SharedMemory->totalAvarias++,
+            sem_post(mutex_sh);
+        }
+        //printf("Total Avarias: %d\n", SharedMemory->totalAvarias);
 
         TotalDistance -= car->speed;
         sleep(1);
