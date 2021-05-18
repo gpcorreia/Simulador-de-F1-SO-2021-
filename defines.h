@@ -7,6 +7,7 @@
 #define MAX_LINES_CONFIG 8
 #define MAX_COLUMS_CONFIG 10
 #define MAX_CHAR_NAMES 20
+#define TOP 5
 
 //Named Semaphores
 
