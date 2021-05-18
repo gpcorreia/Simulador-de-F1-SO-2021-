@@ -13,7 +13,9 @@ typedef struct Car
     int laps;
     float consumption;
     int reliability;
+    int oilcap;
     int totalBox; //numero de entradas na box
+    int distance2finish;
 } Car;
 
 typedef struct indices

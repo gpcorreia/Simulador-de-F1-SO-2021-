@@ -22,7 +22,7 @@ void TeamManager(int indice)
     for (int i = 0; i < EquipasSHM[aux.team].Numcars; i++)
     {
         aux.car = i;
-       
+
         if (pthread_create(&tid[i], NULL, &Carro, (void *)&aux) != 0)
         {
             perror("Erro a criar thread.\n");
@@ -59,9 +59,9 @@ void TeamManager(int indice)
 
 void FixCar(Car car)
 {
-
     car.state = 0;
     car.totalBox++;
+    car.oilcap = oilcap;
 }
 
 //Car thread
@@ -74,7 +74,6 @@ void *Carro(inx *aux)
     message my_msg;
 
     int TotalDistance = lap * dv;
-    int combustivel = oilcap;
     int fourLaps = 4 * dv;
     int twoLaps = 2 * dv;
     printf("Carro : %d ----- Team %s\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
@@ -102,7 +101,7 @@ void *Carro(inx *aux)
             break;
         }
 
-        else if (((combustivel - (fourLaps * EquipasSHM[aux->team].cars[aux->car].consumption) / EquipasSHM[aux->team].cars[aux->car].speed) <= 0) && EquipasSHM[aux->team].cars[aux->car].state == 0)
+        else if (((EquipasSHM[aux->team].cars[aux->car].oilcap - (fourLaps * EquipasSHM[aux->team].cars[aux->car].consumption) / EquipasSHM[aux->team].cars[aux->car].speed) <= 0) && EquipasSHM[aux->team].cars[aux->car].state == 0)
         {
             //começar a entrar na box
             printf("Carro %d tentando entrar na box!!\n", EquipasSHM[aux->team].cars[aux->car].model);
@@ -115,22 +114,24 @@ void *Carro(inx *aux)
             }
         }
 
-        else if (((combustivel - (twoLaps * EquipasSHM[aux->team].cars[aux->car].consumption) / EquipasSHM[aux->team].cars[aux->car].speed) <= 0) && EquipasSHM[aux->team].cars[aux->car].state == 0)
+        else if (((EquipasSHM[aux->team].cars[aux->car].oilcap - (twoLaps * EquipasSHM[aux->team].cars[aux->car].consumption) / EquipasSHM[aux->team].cars[aux->car].speed) <= 0) && EquipasSHM[aux->team].cars[aux->car].state == 0)
         {
-            printf("Carro %d LOW FUEL (SECURTIY MODE ACTiVATED!!", EquipasSHM[aux->team].cars[aux->car].model);
+            printf("Carro %d LOW FUEL (SECURTIY MODE ACTiVATED!!\n", EquipasSHM[aux->team].cars[aux->car].model);
             EquipasSHM[aux->team].cars[aux->car].state = 1;
         }
 
         if (EquipasSHM[aux->team].cars[aux->car].state == 1)
         {
             TotalDistance -= 0.3 * EquipasSHM[aux->team].cars[aux->car].speed;
-            combustivel -= 0.4 * EquipasSHM[aux->team].cars[aux->car].consumption;
+            EquipasSHM[aux->team].cars[aux->car].distance2finish = TotalDistance;
+            EquipasSHM[aux->team].cars[aux->car].oilcap -= 0.4 * EquipasSHM[aux->team].cars[aux->car].consumption;
         }
 
         if (EquipasSHM[aux->team].cars[aux->car].state == 0)
         {
             TotalDistance -= EquipasSHM[aux->team].cars[aux->car].speed;
-            combustivel -= EquipasSHM[aux->team].cars[aux->car].consumption;
+            EquipasSHM[aux->team].cars[aux->car].distance2finish = TotalDistance;
+            EquipasSHM[aux->team].cars[aux->car].oilcap -= EquipasSHM[aux->team].cars[aux->car].consumption;
         }
         //printf("Total Avarias: %d\n", SharedMemory->totalAvarias);
         sleep(1);
@@ -149,7 +150,7 @@ void *Carro(inx *aux)
 
     pthread_exit(NULL);
     return NULL;
-} 
+}
 
 void leitura()
 {
