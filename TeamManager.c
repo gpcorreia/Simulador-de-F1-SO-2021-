@@ -68,7 +68,6 @@ void *Carro(inx aux)
         //printf("carro -> %d, avaria ? -> %d\n", EquipasSHM[aux.team].cars[aux.car].model, my_msg.avaria);
         if (my_msg.avaria == 1)
         {
-
             EquipasSHM[aux.team].cars[aux.car].state = 1;
         }
 
