@@ -15,6 +15,7 @@ typedef struct Car
     int reliability;
     int oilcap;
     int totalBox; //numero de entradas na box
+    int checkBox;
 } Car;
 
 typedef struct indices
