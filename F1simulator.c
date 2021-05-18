@@ -10,7 +10,7 @@ void MalfunctionManager();
 void writeLog(char *info);
 void closeSimulator();
 void closeSimulator();
-int getTop5Cars(Car array[]);
+void getTop5Cars(char *message);
 void PrintStats();
 void endRace();
 
@@ -166,15 +166,19 @@ void PrintStats()
 {
     printf("Escrevendo Estatisticas\n");
 
-    //Top5 carros tendo em conta o numero de voltas completas
-    int top;
-    Car top5[TOP];
-    top = getTop5Cars(top5);
-    printf("TOP 5\n");
-    for(int i=0; i<top; i++)
-    {
-        printf("\t=>CAR: %d | TEAM: %s | LAPS: %d | BOX: %d\n", top5[i].model, top5[i].team, top5[i].laps, top5[i].totalBox);
-    }   
+    //Top5 carros tendo em conta o numero de voltas completas; Carro em ultimo lugar
+    char top5cars[1024];
+    getTop5Cars(top5cars);
+
+    //Carro em ultimo lugar
+
+    //Total de avarias
+
+    //Total de abastecimentos
+
+    //Total de avarias
+
+    //Numero de carros em pista   
 }
 
 void endRace()

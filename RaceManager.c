@@ -12,7 +12,7 @@ int checkCar(int car);
 void printLista();
 void writeLog(char *info);
 void createTM();
-int getTop5Cars(Car array[]);
+void getarrayCars(char *message);
 
 void RaceManager()
 {
@@ -215,11 +215,15 @@ int checkTeam(char *team, int carro, int speed, float consumption, int reliabili
 }
 
 //retorna o numero de 
-int getTop5Cars(Car array[])
+void getTop5Cars(char *message)
 {
     //mete dentro do array todos os carros que participam na corrida
     Car allCars[NumTeam*NumCars];
     int t, i, j, k=0;
+    Car aux;
+    char aux2[1024];
+    int Mindist = dv*lap;
+
     for(i=0; i<SharedMemory->NumTeams; i++)
     {
         for(j=0; j<EquipasSHM[i].Numcars; j++)
@@ -227,6 +231,7 @@ int getTop5Cars(Car array[])
             allCars[k] = EquipasSHM[i].cars[j];
             //printf("%d\n", EquipasSHM[i].cars[j].model);
             //printf("%d\n", array[k].model);
+            //if(EquipasSHM[i].cars[j].)
             k++;
         }
     }
@@ -237,9 +242,8 @@ int getTop5Cars(Car array[])
         printf("%d %d\n", array[i].model, array[i].laps);
     }  */
     
-    //ordenar e retirar os 5 primeiros
 
-    Car aux;
+    //ordenar e retirar os 5 primeiros
     for(i=0; i<k; i++)
     {
         for(j=0; j<k; j++)
@@ -262,11 +266,13 @@ int getTop5Cars(Car array[])
         t = TOP;
     }
 
-    for (i=0; i<t; i++)
+    writeLog("TOP 5");
+
+    for(int i=0; i<t; i++)
     {
-        array[i] = allCars[i];
-    }
-    return t;
+        sprintf(aux2, "=>CAR: %d | TEAM: %s | LAPS: %d | BOX: %d\n", allCars[i].model, allCars[i].team, allCars[i].laps, allCars[i].totalBox);
+        writeLog(aux2);
+    } 
 }
 
 int handleCommand(char *commands)
