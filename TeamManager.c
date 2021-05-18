@@ -76,6 +76,7 @@ void *Carro(inx *aux)
     int TotalDistance = lap * dv;
     int fourLaps = 4 * dv;
     int twoLaps = 2 * dv;
+    EquipasSHM[aux->team].cars[aux->car].state = 0;
     printf("Carro : %d ----- Team %s\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
     printf("O meu Gestor %d\n", getpid());
 

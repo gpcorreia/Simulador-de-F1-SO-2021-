@@ -10,7 +10,7 @@ void MalfunctionManager();
 void writeLog(char *info);
 void closeSimulator();
 void closeSimulator();
-void getTop5Cars(char *message);
+void writeStats();
 void PrintStats();
 void endRace();
 
@@ -167,18 +167,13 @@ void PrintStats()
     printf("Escrevendo Estatisticas\n");
 
     //Top5 carros tendo em conta o numero de voltas completas; Carro em ultimo lugar
-    char top5cars[1024];
-    getTop5Cars(top5cars);
-
     //Carro em ultimo lugar
-
     //Total de avarias
-
     //Total de abastecimentos
-
     //Total de avarias
-
     //Numero de carros em pista   
+    writeStats();
+
 }
 
 void endRace()
@@ -187,11 +182,11 @@ void endRace()
     writeLog("SIMULATOR CLOSING\n");
 }
 
-void getTop5Cars(char *message)
+void writeStats()
 {
     //mete dentro do array todos os carros que participam na corrida
     Car allCars[NumTeam*NumCars];
-    int t, i, j, k=0;
+    int t, i, j, k=0, nCarrosPista=0;
     Car aux;
     Car last = EquipasSHM[0].cars[0];
     char aux2[1024];
@@ -199,7 +194,7 @@ void getTop5Cars(char *message)
 
     for(i=0; i<SharedMemory->NumTeams; i++)
     {
-        for (j = 0; j < EquipasSHM[i].Numcars; j++)
+        for (j=0; j < EquipasSHM[i].Numcars; j++)
         {
             allCars[k] = EquipasSHM[i].cars[j];
             //printf("%d\n", EquipasSHM[i].cars[j].model);
@@ -208,6 +203,10 @@ void getTop5Cars(char *message)
             {
                 Maxdist = EquipasSHM[i].cars[j].distance2finish;
                 last = EquipasSHM[i].cars[j];
+            }
+            if( (EquipasSHM[i].cars[j].state == 0) || (EquipasSHM[i].cars[j].state == 1) || (EquipasSHM[i].cars[j].state == 2) )
+            {
+                ++nCarrosPista;
             }
             k++;
         }
@@ -253,6 +252,15 @@ void getTop5Cars(char *message)
 
     writeLog("CARRO EM ULTIMO LUGAR");
     sprintf(aux2, "=>CAR: %d | TEAM: %s | LAPS: %d | BOX: %d", last.model, last.team, last.laps, last.totalBox);
+    writeLog(aux2);
+
+    sprintf(aux2, "TOTAL DE AVARIAS: %d", SharedMemory->totalAvarias);
+    writeLog(aux2);
+
+    sprintf(aux2, "TOTAL DE ABASTECIMENTOS: %d", SharedMemory->totalAbastecimentos);
+    writeLog(aux2);
+
+    sprintf(aux2, "NUMERO DE CARROS EM PISTA: %d", nCarrosPista);
     writeLog(aux2);
 
 }
