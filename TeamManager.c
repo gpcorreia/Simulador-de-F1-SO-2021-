@@ -117,7 +117,7 @@ void *Carro(inx *aux)
 
         else if (((EquipasSHM[aux->team].cars[aux->car].oilcap - (twoLaps * EquipasSHM[aux->team].cars[aux->car].consumption) / EquipasSHM[aux->team].cars[aux->car].speed) <= 0) && EquipasSHM[aux->team].cars[aux->car].state == 0)
         {
-            printf("Carro %d LOW FUEL (SECURTIY MODE ACTiVATED!!\n", EquipasSHM[aux->team].cars[aux->car].model);
+            printf("Carro %d LOW FUEL (SECURTIY MODE ACTIVATED!!\n", EquipasSHM[aux->team].cars[aux->car].model);
             EquipasSHM[aux->team].cars[aux->car].state = 1;
         }
 
