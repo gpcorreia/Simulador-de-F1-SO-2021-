@@ -13,19 +13,26 @@ typedef struct Car
     int laps;
     float consumption;
     int reliability;
+    int totalBox;
 } Car;
+
+typedef struct indices
+{
+    int team;
+    int car;
+} inx;
 
 typedef struct PitBox //Box das equipas
 {
     int state; //0 - disponivel; 1 - ocupada; 2 - reservada;
-    // int tempMax;
-    // int tempMin;
+    int car;
 } box;
 
 typedef struct Team
 {
     char name[MAX_CHAR_NAMES];
     int Numcars;
+    int FinishCars;
     Car cars[2]; //index
     box pitbox;
 } Team;
@@ -35,6 +42,7 @@ typedef struct shared_memory
     int infoRace; // 1- if Started Race/resume     2 - if Pause
     int NumCars;
     int FinishCars;
+    int desistencias;
     int NumTeams;
     int totalAvarias;
     Team *teams; //lista ligada de equipas

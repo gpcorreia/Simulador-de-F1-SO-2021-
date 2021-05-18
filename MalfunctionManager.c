@@ -13,7 +13,6 @@ void MalfunctionManager()
     printf("Gestor de Avarias Iniciado\n");
     printf("O meu é %d\n", getpid());
     printf("O meu pai é %d\n", getppid());
-
     //sleep(5); //simular codigo a correr
     while (1)
     {
@@ -25,7 +24,6 @@ void MalfunctionManager()
         //determina se ocorre uma avaria e notifica os carros atraves da message queue
         notificaCarros();
     }
-
 }
 
 //retorna 0 se nao tiver avaria e 1 se tiver
@@ -50,17 +48,23 @@ int notificaCarros()
         printf("Lista de equipas Vazia\n");
     }
 
-    for (int i=0; i<SharedMemory->NumTeams; i++)
+    for (int i = 0; i < SharedMemory->NumTeams; i++)
     {
-        for(int j=0; j<EquipasSHM[i].Numcars; j++)
+        for (int j = 0; j < EquipasSHM[i].Numcars; j++)
         {
             //gera a avaria (ou nao)
             auxAvaria = gera_avarias(EquipasSHM[i].cars[j].reliability);
-            msg.msgtype=EquipasSHM[i].cars[j].model;
-            msg.avaria=auxAvaria;
+            msg.msgtype = EquipasSHM[i].cars[j].model;
+            msg.avaria = auxAvaria;
 
+            if (auxAvaria == 1)
+            {
+                sem_wait(mutex_sh);
+                SharedMemory->totalAvarias++,
+                    sem_post(mutex_sh);
+            }
             //notifica o carro
-            if(msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1)
+            if (msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1)
             {
                 perror("Error: msgsnd()\n");
                 exit(1);

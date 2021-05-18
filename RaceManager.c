@@ -27,7 +27,7 @@ void RaceManager()
 
     if ((fdPipe = open(PIPE_NAME, O_RDONLY | O_NONBLOCK)) < 0)
     {
-        perror("Cannot open Pipe:\n");
+        perror("Cannot open Pipe!\n");
         exit(0);
     }
     while (1)
@@ -105,8 +105,7 @@ void createTM()
     {
         if (fork() == 0)
         {
-            TeamManager(EquipasSHM[i]);
-            sleep(5);
+            TeamManager(i);
             exit(0);
         }
     }
