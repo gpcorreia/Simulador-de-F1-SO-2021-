@@ -87,6 +87,7 @@ void RaceManager()
                 writeLog(infos);
             }
         }
+        // printLista();
         // if (write(p[1], &ola, sizeof(ola)) != 0)
         // {
         //     printf("%s\n", stateTM);
@@ -160,11 +161,7 @@ void printLista()
         {
             printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].model);
             printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].oilcap);
-            printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].state);
             printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].checkBox);
-            printf("Carro[%d] = %f\n", j, EquipasSHM[i].cars[j].consumption);
-            printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].reliability);
-            printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].totalBox);
         }
     }
 }

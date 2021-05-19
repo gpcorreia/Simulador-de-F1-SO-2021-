@@ -40,9 +40,12 @@ void TeamManager(int indice)
         {
             if (EquipasSHM[aux.team].pitbox.car == EquipasSHM[aux.team].cars[i].model)
             {
+                sem_wait(mutex_sh);
                 EquipasSHM[aux.team].pitbox.state = 1;
                 FixCar(EquipasSHM[aux.team].cars[i]);
                 EquipasSHM[aux.team].pitbox.state = 0;
+                EquipasSHM[aux.team].cars[aux.car].state = 0;
+                sem_post(mutex_sh);
             }
         }
     }
@@ -85,7 +88,7 @@ void *Carro(inx *aux)
     // printf("Carro : %d ----- Team %s\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
     // printf("O meu Gestor %d\n", getpid());
 
-    while (TotalDistance > 0)
+    while (TotalDistance < 0)
     {
         if (EquipasSHM[aux->team].cars[aux->car].checkBox == 1)
         {
@@ -95,44 +98,51 @@ void *Carro(inx *aux)
         {
             msgrcv(msqid, &my_msg, sizeof(my_msg) - sizeof(long), EquipasSHM[aux->team].cars[aux->car].model, IPC_NOWAIT);
 
-            //printf("my_msg -> %ld, %d\n", my_msg.msgtype, my_msg.avaria);
-            //printf("carro -> %d, avaria ? -> %d\n", EquipasSHM[aux->team].cars[aux->car].model, my_msg.avaria);
+            // printf("my_msg -> %ld, %d\n", my_msg.msgtype, my_msg.avaria);
+            // printf("carro -> %d, avaria ? -> %d\n", EquipasSHM[aux->team].cars[aux->car].model, my_msg.avaria);
+
             if (my_msg.avaria == 1)
             {
-                printf("Avaria no Carro %d MODO SAFE ON!!\n", EquipasSHM[aux->team].cars[aux->car].model);
+                printf("Car %d HAD MALFUNCTION, MODO SAFE ON!!\n", EquipasSHM[aux->team].cars[aux->car].model);
                 EquipasSHM[aux->team].cars[aux->car].state = 1;
             }
 
             else if (EquipasSHM[aux->team].cars[aux->car].oilcap == 0)
             {
+                printf("Car %d RUN OF GAS!! Abort Race!!\n", EquipasSHM[aux->team].cars[aux->car].model);
                 sem_wait(mutex_sh);
                 SharedMemory->desistencias++;
+                EquipasSHM[aux->team].FinishCars++;
                 EquipasSHM[aux->team].cars[aux->car].state = 3;
                 sem_post(mutex_sh);
-                printf("Car %d Team %s RUN OF GAS!\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
                 break;
             }
 
-            else if (((EquipasSHM[aux->team].cars[aux->car].oilcap - (fourLaps * EquipasSHM[aux->team].cars[aux->car].consumption) / EquipasSHM[aux->team].cars[aux->car].speed) <= 0) && EquipasSHM[aux->team].cars[aux->car].state == 0)
+            else if ((EquipasSHM[aux->team].cars[aux->car].oilcap - (fourLaps * EquipasSHM[aux->team].cars[aux->car].consumption / EquipasSHM[aux->team].cars[aux->car].speed)) <= 0)
             {
                 //começar a entrar na box
-                printf("Carro %d tentando entrar na box!!\n", EquipasSHM[aux->team].cars[aux->car].model);
+                // printf("Carro %d tentando entrar na box!!\n", EquipasSHM[aux->team].cars[aux->car].model);
 
                 if (EquipasSHM[aux->team].pitbox.state == 0)
                 {
-                    printf("Carro %d entrou na box!!\n", EquipasSHM[aux->team].cars[aux->car].model);
+                    //entrou na box
+                    printf(">>>> Carro %d entrou na box!!\n", EquipasSHM[aux->team].cars[aux->car].model);
+                    sem_wait(mutex_sh);
                     EquipasSHM[aux->team].pitbox.car = EquipasSHM[aux->team].cars[aux->car].model;
                     EquipasSHM[aux->team].pitbox.state = 2;
                     EquipasSHM[aux->team].cars[aux->car].checkBox = 1;
+                    sem_post(mutex_sh);
                 }
-                if (EquipasSHM[aux->team].pitbox.state == 1)
+                else if (EquipasSHM[aux->team].pitbox.state == 1)
                 {
                     printf("Carro %d à espera de entrar na box!!", EquipasSHM[aux->team].cars[aux->car].model);
                 }
             }
-            else if (((EquipasSHM[aux->team].cars[aux->car].oilcap - (twoLaps * EquipasSHM[aux->team].cars[aux->car].consumption) / EquipasSHM[aux->team].cars[aux->car].speed) <= 0) && EquipasSHM[aux->team].cars[aux->car].state == 0)
+            else if ((EquipasSHM[aux->team].cars[aux->car].oilcap - (twoLaps * EquipasSHM[aux->team].cars[aux->car].consumption / EquipasSHM[aux->team].cars[aux->car].speed)) <= 0)
             {
+                sem_wait(mutex_sh);
                 EquipasSHM[aux->team].cars[aux->car].state = 1;
+                sem_post(mutex_sh);
             }
 
             if (EquipasSHM[aux->team].cars[aux->car].state == 1)
@@ -150,16 +160,21 @@ void *Carro(inx *aux)
             }
         }
     }
-    if (SharedMemory->FinishCars == 0)
+
+    if (SharedMemory->FinishCars == 0 && EquipasSHM[aux->team].cars[aux->car].state != 3)
     {
         printf("Carro : %d ----- Team %s -> Ganhou a Corrida!!\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
+        sem_wait(mutex_sh);
         SharedMemory->FinishCars++;
+        sem_post(mutex_sh);
     }
     else if (SharedMemory->FinishCars != 0 && EquipasSHM[aux->team].cars[aux->car].state != 3)
     {
         printf("Carro : %d ----- Team %s -> Terminou a Corrida!!\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
+        sem_wait(mutex_sh);
         EquipasSHM[aux->team].cars[aux->car].state = 4;
         SharedMemory->FinishCars++;
+        sem_post(mutex_sh);
     }
     pthread_exit(NULL);
     return NULL;
