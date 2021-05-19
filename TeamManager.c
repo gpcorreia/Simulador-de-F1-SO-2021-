@@ -44,7 +44,9 @@ void TeamManager(int indice)
                 EquipasSHM[aux.team].pitbox.state = 1;
                 FixCar(&EquipasSHM[aux.team].cars[i]);
                 EquipasSHM[aux.team].pitbox.state = 0;
+                EquipasSHM[aux.team].pitbox.car = 0;
                 EquipasSHM[aux.team].cars[aux.car].state = 0;
+                EquipasSHM[aux.team].cars[aux.car].checkMal = 0;
                 sem_post(mutex_sh);
                 printf("%d sai da box\n", EquipasSHM[aux.team].cars[i].model);
             }
@@ -79,7 +81,7 @@ void FixCar(Car *car)
 
     else if (car->checkMal == 2)
     {
-        time = min + rand() % max;
+        time = rand() % max + min;
         car->state = 0;
         car->totalBox++;
         car->oilcap = oilcap;
@@ -101,19 +103,17 @@ void *Carro(inx *aux)
     int TotalDistance = lap * dv;
     int fourLaps = 4 * dv;
     int twoLaps = 2 * dv;
-    EquipasSHM[aux->team].cars[aux->car].state = 0;
     // printf("Carro : %d ----- Team %s\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
     // printf("O meu Gestor %d\n", getpid());
 
     while (TotalDistance > 0)
     {
-
         msgrcv(msqid, &my_msg, sizeof(my_msg), EquipasSHM[aux->team].cars[aux->car].model, IPC_NOWAIT);
 
         // printf("my_msg -> %ld, %d\n", my_msg.msgtype, my_msg.avaria);
         //printf("carro -> %d, avaria ? -> %d\n", EquipasSHM[aux->team].cars[aux->car].model, my_msg.avaria);
 
-        if (my_msg.avaria == 1 && EquipasSHM[aux->team].cars[aux->car].state != 1) //Recebe msg de avaria caso o carro esteja em estado diferente de avaria
+        if (my_msg.avaria == 1) //Recebe msg de avaria caso o carro esteja em estado diferente de avaria
         {
             printf("Car %d HAD MALFUNCTION, MODO SAFE ON!!\n", EquipasSHM[aux->team].cars[aux->car].model);
             EquipasSHM[aux->team].cars[aux->car].state = 1;
@@ -128,12 +128,12 @@ void *Carro(inx *aux)
                 printf(">>>> Carro %d entrou na box!!\n", EquipasSHM[aux->team].cars[aux->car].model);
                 sem_wait(mutex_sh);
                 EquipasSHM[aux->team].pitbox.car = EquipasSHM[aux->team].cars[aux->car].model;
-                EquipasSHM[aux->team].pitbox.state = 2;
+                EquipasSHM[aux->team].pitbox.state = 1;
                 sem_post(mutex_sh);
             }
             else if (EquipasSHM[aux->team].pitbox.state == 1)
             {
-                printf("Carro %d à espera de entrar na box!! Com urgencia!!", EquipasSHM[aux->team].cars[aux->car].model);
+                printf("Carro %d à espera de entrar na box!! Com urgencia!!\n", EquipasSHM[aux->team].cars[aux->car].model);
             }
         }
 
@@ -159,7 +159,7 @@ void *Carro(inx *aux)
                 printf(">>>> Carro %d entrou na box!!\n", EquipasSHM[aux->team].cars[aux->car].model);
                 sem_wait(mutex_sh);
                 EquipasSHM[aux->team].pitbox.car = EquipasSHM[aux->team].cars[aux->car].model;
-                EquipasSHM[aux->team].pitbox.state = 2;
+                EquipasSHM[aux->team].pitbox.state = 1;
                 sem_post(mutex_sh);
             }
             else if (EquipasSHM[aux->team].pitbox.state == 1)
@@ -184,14 +184,14 @@ void *Carro(inx *aux)
             EquipasSHM[aux->team].cars[aux->car].oilcap -= 0.4 * EquipasSHM[aux->team].cars[aux->car].consumption;
         }
 
-        if (EquipasSHM[aux->team].cars[aux->car].state == 0) // Decrementacao de variaveis consoante estado (Corrida)
+        else if (EquipasSHM[aux->team].cars[aux->car].state == 0) // Decrementacao de variaveis consoante estado (Corrida)
         {
             TotalDistance -= EquipasSHM[aux->team].cars[aux->car].speed;
             EquipasSHM[aux->team].cars[aux->car].distance2finish = TotalDistance;
             EquipasSHM[aux->team].cars[aux->car].oilcap -= EquipasSHM[aux->team].cars[aux->car].consumption;
         }
 
-        sleep(ut);
+        sleep(8);
     }
 
     if (SharedMemory->FinishCars == 0 && EquipasSHM[aux->team].cars[aux->car].state != 3)
