@@ -65,12 +65,12 @@ int notificaCarros()
             }
             
             //notifica o carro
-            if (msgsnd(msqid, &msg, sizeof(msg) - sizeof(long), 0) == -1)
+            if (msgsnd(msqid, &msg, sizeof(msg), 0) == -1)
             {
                 perror("Error: msgsnd()\n");
                 exit(1);
             }
-            //printf("Enviei para mq -> carro: %ld, avaria: %d\n", msg.msgtype, msg.avaria);
+            printf("Enviei para mq -> carro: %ld, avaria: %d\n", msg.msgtype, msg.avaria);
         }
     }
     return 0;

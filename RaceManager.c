@@ -134,7 +134,7 @@ int insereCarro(char *team, int carro, int speed, float consumption, int reliabi
             EquipasSHM[SharedMemory->NumTeams].cars[0].reliability = reliability;
             EquipasSHM[SharedMemory->NumTeams].cars[0].laps = 0;
             EquipasSHM[SharedMemory->NumTeams].cars[0].state = 0;
-            EquipasSHM[SharedMemory->NumTeams].cars[0].checkBox = 0;
+            EquipasSHM[SharedMemory->NumTeams].cars[0].checkMal = 0;
             EquipasSHM[SharedMemory->NumTeams].cars[0].oilcap = oilcap;
             EquipasSHM[SharedMemory->NumTeams].cars[0].distance2finish = dv * lap;
             EquipasSHM[SharedMemory->NumTeams].Numcars = 1;
@@ -161,7 +161,7 @@ void printLista()
         {
             printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].model);
             printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].oilcap);
-            printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].checkBox);
+            printf("Carro[%d] = %d\n", j, EquipasSHM[i].cars[j].checkMal);
         }
     }
 }
@@ -203,7 +203,7 @@ int checkTeam(char *team, int carro, int speed, float consumption, int reliabili
                 EquipasSHM[i].cars[EquipasSHM[i].Numcars].reliability = reliability;
                 EquipasSHM[i].cars[EquipasSHM[i].Numcars].laps = 0;
                 EquipasSHM[i].cars[EquipasSHM[i].Numcars].state = 0;
-                EquipasSHM[i].cars[EquipasSHM[i].Numcars].checkBox = 0;
+                EquipasSHM[i].cars[EquipasSHM[i].Numcars].checkMal = 0;
                 EquipasSHM[i].cars[EquipasSHM[i].Numcars].oilcap = oilcap;
                 EquipasSHM[i].cars[EquipasSHM[i].Numcars].distance2finish = dv * lap;
                 EquipasSHM[i].Numcars++;

@@ -29,6 +29,7 @@ SHARED_MEMORY *SharedMemory; //shared memory
 sem_t *mutex_write_log; //mutex write in log/cmd
 sem_t *mutex_up;        //mutex write in unnamed pipe
 sem_t *mutex_sh;        //mutex for shared memory
+//sem_t *mutex_pb;         //mutex for PitBox
 
 pthread_mutex_t mutex; //Mutex para threads
 
