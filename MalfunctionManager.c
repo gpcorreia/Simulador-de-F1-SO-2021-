@@ -53,24 +53,27 @@ int notificaCarros()
         for (int j = 0; j < EquipasSHM[i].Numcars; j++)
         {
             //gera a avaria (ou nao)
-            auxAvaria = gera_avarias(EquipasSHM[i].cars[j].reliability);
-            msg.msgtype = EquipasSHM[i].cars[j].model;
-            msg.avaria = auxAvaria;
+            if (EquipasSHM[i].cars[j].state == 0 && EquipasSHM[i].cars[j].checkMal == 0)
+            {
+                auxAvaria = gera_avarias(EquipasSHM[i].cars[j].reliability);
+                msg.msgtype = EquipasSHM[i].cars[j].model;
+                msg.avaria = auxAvaria;
 
-            if (auxAvaria == 1)
-            {
-                sem_wait(mutex_sh);
-                SharedMemory->totalAvarias++,
-                sem_post(mutex_sh);
+                if (auxAvaria == 1)
+                {
+                    sem_wait(mutex_sh);
+                    SharedMemory->totalAvarias++,
+                        sem_post(mutex_sh);
+                }
+
+                //notifica o carro
+                if (msgsnd(msqid, &msg, sizeof(msg), 0) == -1)
+                {
+                    perror("Error: msgsnd()\n");
+                    exit(1);
+                }
+                printf("Enviei para mq -> carro: %ld, avaria: %d\n", msg.msgtype, msg.avaria);
             }
-            
-            //notifica o carro
-            if (msgsnd(msqid, &msg, sizeof(msg), 0) == -1)
-            {
-                perror("Error: msgsnd()\n");
-                exit(1);
-            }
-            printf("Enviei para mq -> carro: %ld, avaria: %d\n", msg.msgtype, msg.avaria);
         }
     }
     return 0;
