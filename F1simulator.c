@@ -110,6 +110,14 @@ void init()
         exit(1);
     }
 
+   /*  sem_unlink(MUTEX_PB); //mutex para Pit Box
+    mutex_pb = sem_open(MUTEX_PB, O_CREAT | O_EXCL, 0700, 1);
+    if (mutex_pb == SEM_FAILED)
+    {
+        perror("Failure creating the semaphore MUTEX\n");
+        exit(1);
+    } */
+
     if ((mkfifo(PIPE_NAME, O_CREAT | O_EXCL | 0600) < 0) && (errno != EEXIST)) //create named pipe
     {
         perror("Cannot open pipe: \n");
@@ -308,6 +316,7 @@ void closeSimulator()
         perror("Erro ao apagar MUTEX_SH.\n");
         exit(1);
     }
+
     //Destruição do (named) mutex usado para o controlo da escrita no log.txt
     if (sem_close(mutex_write_log))
     {
@@ -319,6 +328,8 @@ void closeSimulator()
         perror("Erro ao apagar MUTEX_WR_LOG.\n");
         exit(1);
     }
+
+    //Destruição do (named) mutex usado para o controlo da escrita no unnamed pipe
     if (sem_close(mutex_up))
     {
         perror("Erro sem_close(mutex_up).\n");
@@ -330,6 +341,19 @@ void closeSimulator()
         exit(1);
     }
 
+    /* //Destruicao do (named) mutex usado no controlo de acessos a PitBox
+    if (sem_close(mutex_pb))
+    {
+        perror("Erro sem_close(mutex_up).\n");
+        exit(1);
+    }
+    if (sem_unlink(MUTEX_PB))
+    {
+        perror("Erro ao apagar MUTEX_UP.\n");
+        exit(1);
+    } */
+
+    //Destruicao da message queue
     if (msgctl(msqid, IPC_RMID, 0) == -1)
     {
         perror("Error: msgctl()\n");

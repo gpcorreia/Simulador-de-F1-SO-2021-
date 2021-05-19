@@ -14,6 +14,7 @@
 #define MUTEX_UP "MT WR LOG"          //mutex for write log
 #define MUTEX_WR_LOG "MT UnnamedPipe" //mutex for Unnamed Pipe
 #define MUTEX_SH "MT SharedMem"       //mutex for shared memory
+#define MUTEX_PB "MT PitBox"          //mutex for PitBox
 #define PIPE_NAME "namedpipe"
 
 #define KEY 2212
