@@ -53,7 +53,7 @@ int notificaCarros()
         for (int j = 0; j < EquipasSHM[i].Numcars; j++)
         {
             //gera a avaria (ou nao)
-            if (EquipasSHM[i].cars[j].state == 0 && EquipasSHM[i].cars[j].checkMal == 0)
+            if (EquipasSHM[i].cars[j].state == 0 && EquipasSHM[i].cars[j].checkMal == 0 && EquipasSHM[i].cars[j].checkBox == 1)
             {
                 auxAvaria = gera_avarias(EquipasSHM[i].cars[j].reliability);
                 msg.msgtype = EquipasSHM[i].cars[j].model;
@@ -72,7 +72,7 @@ int notificaCarros()
                     perror("Error: msgsnd()\n");
                     exit(1);
                 }
-                printf("Enviei para mq -> carro: %ld, avaria: %d\n", msg.msgtype, msg.avaria);
+                // printf("Enviei para mq -> carro: %ld, avaria: %d\n", msg.msgtype, msg.avaria);
             }
         }
     }

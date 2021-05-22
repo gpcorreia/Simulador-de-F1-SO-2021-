@@ -22,6 +22,7 @@ void RaceManager()
 
     int nread;
     char CommandsNP[1000];
+    char CommandsUP[1000];
     char infos[1024];
     pipe(p);
 
@@ -87,11 +88,11 @@ void RaceManager()
                 writeLog(infos);
             }
         }
-        // printLista();
-        // if (write(p[1], &ola, sizeof(ola)) != 0)
-        // {
-        //     printf("%s\n", stateTM);
-        // }
+
+        if (read(p[0], &CommandsUP, sizeof(CommandsUP)) != 0)
+        {
+            printf("%s\n", CommandsUP);
+        }
     }
 
     for (int i = 0; i < NumTeam; i++)
@@ -135,6 +136,7 @@ int insereCarro(char *team, int carro, int speed, float consumption, int reliabi
             EquipasSHM[SharedMemory->NumTeams].cars[0].laps = 0;
             EquipasSHM[SharedMemory->NumTeams].cars[0].state = 0;
             EquipasSHM[SharedMemory->NumTeams].cars[0].checkMal = 0;
+            EquipasSHM[SharedMemory->NumTeams].cars[0].checkBox = 0;
             EquipasSHM[SharedMemory->NumTeams].cars[0].oilcap = oilcap;
             EquipasSHM[SharedMemory->NumTeams].cars[0].distance2finish = dv * lap;
             EquipasSHM[SharedMemory->NumTeams].Numcars = 1;
@@ -204,6 +206,7 @@ int checkTeam(char *team, int carro, int speed, float consumption, int reliabili
                 EquipasSHM[i].cars[EquipasSHM[i].Numcars].laps = 0;
                 EquipasSHM[i].cars[EquipasSHM[i].Numcars].state = 0;
                 EquipasSHM[i].cars[EquipasSHM[i].Numcars].checkMal = 0;
+                EquipasSHM[i].cars[EquipasSHM[i].Numcars].checkBox = 0;
                 EquipasSHM[i].cars[EquipasSHM[i].Numcars].oilcap = oilcap;
                 EquipasSHM[i].cars[EquipasSHM[i].Numcars].distance2finish = dv * lap;
                 EquipasSHM[i].Numcars++;

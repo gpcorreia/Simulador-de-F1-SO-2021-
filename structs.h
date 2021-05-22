@@ -16,6 +16,7 @@ typedef struct Car
     int oilcap;
     int totalBox; //numero de entradas na box
     int checkMal; // 0 - corrida  1 - Segurança pq precisa de Abastecer   2 - Abastecer e Avaria
+    int checkBox;
     int distance2finish;
 } Car;
 
