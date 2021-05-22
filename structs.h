@@ -8,14 +8,14 @@ typedef struct Car
 { //"Thread" dos carros
     char team[MAX_CHAR_NAMES];
     int model;
-    int state; //0-Corrida - 1-Segurança - 2-Box - 3-Desistencia - 4-Terminado
+    int state; //0-Corrida - 1-Segurança - 2-Box - 3-Desistencia - 4-Terminado - 5-ReservaBox
     int speed;
     int laps;
     float consumption;
     int reliability;
-    int oilcap;
+    float oilcap;
     int totalBox; //numero de entradas na box
-    int checkMal; // 0 - corrida  1 - Segurança pq precisa de Abastecer   2 - Abastecer e Avaria
+    int checkMal; // 0 - nada a fazer  1 - Segurança pq precisa de Abastecer   2 - Abastecer e Avaria  3 - Abastecer mas nao em estado de segurança
     int distance2finish;
 } Car;
 
