@@ -26,6 +26,7 @@ void RaceManager()
     char CommandsUP[1000];
     char infos[1024];
     pipe(p);
+    fcntl(p[0], F_SETFL, O_NONBLOCK);
 
     if ((fdPipe = open(PIPE_NAME, O_RDONLY | O_NONBLOCK)) < 0)
     {
@@ -51,15 +52,6 @@ void RaceManager()
                 writeLog(infos);
                 printLista();
                 createTM();
-
-                while (1)
-                {
-                    if (read(p[0], &CommandsUP, sizeof(CommandsUP)) != 0)
-                    {
-                        handleUP(CommandsUP);
-                    }
-                    sleep(4);
-                }
             }
             else if (strcmp(CommandsNP, "START RACE!\n") == 0 && SharedMemory->NumTeams < NumTeam)
             {
@@ -97,6 +89,14 @@ void RaceManager()
                 writeLog(infos);
             }
         }
+        sem_wait(mutex_up);
+        close(p[1]);
+        if (read(p[0], &CommandsUP, sizeof(CommandsUP)) != 0)
+        {
+            handleUP(CommandsUP);
+            CommandsUP[0] = '\0';
+        }
+        sem_post(mutex_up);
     }
 
     for (int i = 0; i < NumTeam; i++)
@@ -240,31 +240,34 @@ int handleCommand(char *commands)
 
 void handleUP(char *commands)
 {
-
-    char command[50];
-    char info[50];
-    int car;
-    sscanf(commands, "Carro [%d]: %s!", &car, command);
-
-    if (strcmp(command, "FINISH") == 0)
+    if (strlen(commands) > 0)
     {
-        if (SharedMemory->FinishCars == 0)
+
+        char command[50];
+        char info[50];
+        int car;
+        sscanf(commands, "Carro [%d]: %s!", &car, command);
+
+        if (strcmp(command, "FINISH") == 0)
         {
-            sprintf(info, "Car %d WINS THE RACE", car);
-            writeLog(info);
-            sem_wait(mutex_sh);
-            SharedMemory->FinishCars++;
-            sem_post(mutex_sh);
+            if (SharedMemory->FinishCars == 0)
+            {
+                sprintf(info, "Car %d WINS THE RACE", car);
+                writeLog(info);
+                sem_wait(mutex_sh);
+                SharedMemory->FinishCars++;
+                sem_post(mutex_sh);
+            }
+            else
+            {
+                sem_wait(mutex_sh);
+                SharedMemory->FinishCars++;
+                sem_post(mutex_sh);
+            }
         }
         else
         {
-            sem_wait(mutex_sh);
-            SharedMemory->FinishCars++;
-            sem_post(mutex_sh);
+            writeLog(commands);
         }
-    }
-    else
-    {
-        writeLog(commands);
     }
 }

@@ -113,6 +113,8 @@ void FixCar(Car *car)
 void SendToRM(Car car, int state)
 {
     sem_wait(mutex_up);
+    close(f[0]);
+
     if (state == 0)
     { // dizer race manager que ficou sem combustivel
         msgUnnamedPipe[0] = '\0';
