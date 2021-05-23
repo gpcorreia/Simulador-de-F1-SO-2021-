@@ -45,7 +45,7 @@ void F1simulator() //gestor de corrida("RaceManager") + gestor de Avarias("...")
     else
     {
         signal(SIGTSTP, PrintStats);
-        printf("\nF1 Simulator %d \n", getpid());
+        // printf("\nF1 Simulator %d \n", getpid());
     }
 
     for (int i = 0; i < 2; i++)
@@ -186,7 +186,6 @@ void PrintStats()
 void endRace()
 {
     closeSimulator();
-    writeLog("SIMULATOR CLOSING\n");
 }
 
 void writeStats()
@@ -195,23 +194,17 @@ void writeStats()
     Car allCars[NumTeam * NumCars];
     int t, i, j, k = 0, nCarrosPista = 0;
     Car aux;
-    Car last = EquipasSHM[0].cars[0];
-    int minLaps = lap;
+    // Car last = EquipasSHM[0].cars[0];
 
     for (i = 0; i < SharedMemory->NumTeams; i++)
     {
         for (j = 0; j < EquipasSHM[i].Numcars; j++)
         {
-            if (EquipasSHM[i].cars[j].state != 4)
+            if (EquipasSHM[i].cars[j].state != 3 && EquipasSHM[i].cars[j].state != 4)
             {
                 allCars[k] = EquipasSHM[i].cars[j];
                 //printf("%d\n", EquipasSHM[i].cars[j].model);
                 //printf("%d\n", array[k].model);
-                if (EquipasSHM[i].cars[j].laps < minLaps)
-                {
-                    minLaps = EquipasSHM[i].cars[j].laps;
-                    last = EquipasSHM[i].cars[j];
-                }
                 ++nCarrosPista;
                 k++;
             }
@@ -223,7 +216,7 @@ void writeStats()
     {
         for (j = 0; j < k; j++)
         {
-            if (EquipasSHM[i].cars[j].state != 4)
+            if (EquipasSHM[i].cars[j].state != 3)
             {
                 if (allCars[i].laps > allCars[j].laps)
                 {
@@ -252,7 +245,7 @@ void writeStats()
     }
 
     printf("CARRO EM ULTIMO LUGAR\n");
-    printf("=>CAR: %d | TEAM: %s | LAPS: %d | BOX: %d\n", last.model, last.team, last.laps, last.totalBox);
+    printf("=>CAR: %d | TEAM: %s | LAPS: %d | BOX: %d\n", allCars[k - 1].model, allCars[k - 1].team, allCars[k - 1].laps, allCars[k - 1].totalBox); // K = last Index
 
     printf("TOTAL DE AVARIAS: %d\n", SharedMemory->totalAvarias);
 
@@ -266,7 +259,7 @@ void writeStats()
 //eliminar todos  os recursos requisitados pelos processos (semaforos, memorias partilhadas...)
 void closeSimulator()
 {
-
+    writeLog("SIMULATOR CLOSING\n");
     //desattach da memória partilhada
     if (shmdt(SharedMemory->teams) == -1)
     {

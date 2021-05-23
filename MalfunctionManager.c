@@ -10,9 +10,9 @@ int notificaCarros();
 void MalfunctionManager()
 {
     // pid_t pid;
-    printf("Gestor de Avarias Iniciado\n");
-    printf("O meu é %d\n", getpid());
-    printf("O meu pai é %d\n", getppid());
+    // printf("Gestor de Avarias Iniciado\n");
+    // printf("O meu é %d\n", getpid());
+    // printf("O meu pai é %d\n", getppid());
     //sleep(5); //simular codigo a correr
     while (1)
     {

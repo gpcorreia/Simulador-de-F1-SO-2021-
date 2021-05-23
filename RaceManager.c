@@ -13,13 +13,14 @@ int checkCar(int car);
 void printLista();
 void writeLog(char *info);
 void createTM();
+void writeStats();
 
 void RaceManager()
 {
     // pid_t pid;
-    printf("Gestor de Corrida Iniciado\n");
-    printf("O meu é %d\n", getpid());
-    printf("O meu pai é %d\n", getppid());
+    // printf("Gestor de Corrida Iniciado\n");
+    // printf("O meu é %d\n", getpid());
+    // printf("O meu pai é %d\n", getppid());
 
     int nread;
     char CommandsNP[1000];
@@ -79,7 +80,7 @@ void RaceManager()
                 }
                 else
                 {
-                    writeLog("Race Already Started!");
+                    writeLog("Rejected, Race Already Started!");
                 }
             }
             else
@@ -90,7 +91,7 @@ void RaceManager()
             }
         }
         sem_wait(mutex_up);
-        close(p[1]);
+        // close(p[1]);
         if (read(p[0], &CommandsUP, sizeof(CommandsUP)) != 0)
         {
             handleUP(CommandsUP);
@@ -242,21 +243,20 @@ void handleUP(char *commands)
 {
     if (strlen(commands) > 0)
     {
-
         char command[50];
         char info[50];
         int car;
-        sscanf(commands, "Carro [%d]: %s!", &car, command);
-
-        if (strcmp(command, "FINISH") == 0)
+        sscanf(commands, "CAR %d %s", &car, command);
+        if (strcmp(command, "FINISH!") == 0)
         {
             if (SharedMemory->FinishCars == 0)
             {
-                sprintf(info, "Car %d WINS THE RACE", car);
+                sprintf(info, "CAR %d WINS THE RACE!", car);
                 writeLog(info);
                 sem_wait(mutex_sh);
                 SharedMemory->FinishCars++;
                 sem_post(mutex_sh);
+                writeStats();
             }
             else
             {
