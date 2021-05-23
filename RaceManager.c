@@ -8,6 +8,7 @@ int handleCommand(char *commands);
 int insereCarro(char *team, int carro, int speed, float consumption, int reliability);
 int checkTeam(char *team, int carro, int speed, float consumption, int reliability);
 int handleCommand(char *commands);
+void handleUP(char *commands);
 int checkCar(int car);
 void printLista();
 void writeLog(char *info);
@@ -22,6 +23,7 @@ void RaceManager()
 
     int nread;
     char CommandsNP[1000];
+    char CommandsUP[1000];
     char infos[1024];
     pipe(p);
 
@@ -32,12 +34,10 @@ void RaceManager()
     }
     while (1)
     {
-        //verificaCorrida();
-        // if (SharedMemory->FinishCars == NumCars)
-        // {
-        //     printf("Acabou a Corrida\n");
-        //     break;
-        // }
+        if (SharedMemory->FinishCars == NumCars)
+        {
+            break;
+        }
         if ((nread = read(fdPipe, &CommandsNP, sizeof(char) * 10000)) != 0) //named pipe
         {
             CommandsNP[nread] = '\0';
@@ -87,11 +87,11 @@ void RaceManager()
                 writeLog(infos);
             }
         }
-        // printLista();
-        // if (write(p[1], &ola, sizeof(ola)) != 0)
-        // {
-        //     printf("%s\n", stateTM);
-        // }
+
+        /* if (read(p[0], &CommandsUP, sizeof(CommandsUP)) != 0)
+        {
+            handleUP(CommandsUP);
+        } */
     }
 
     for (int i = 0; i < NumTeam; i++)
@@ -231,4 +231,35 @@ int handleCommand(char *commands)
     regcomp(&regex, "ADDCAR TEAM: [a-zA-Z], CAR: [0-9]+, SPEED: [+-]?([0-9]*[.])?[0-9]+, CONSUMPTION: [+-]?([0-9]*[.])?[0-9]+, RELIABILITY: [0-9]+", REG_ICASE | REG_EXTENDED);
 
     return regexec(&regex, commands, 0, NULL, 0);
+}
+
+void handleUP(char *commands)
+{
+
+    char command[50];
+    char info[50];
+    int car;
+    sscanf(commands, "Carro [%d]: %s!", &car, command);
+
+    if (strcmp(command, "FINISH") == 0)
+    {
+        if (SharedMemory->FinishCars == 0)
+        {
+            sprintf(info, "Car %d WINS THE RACE", car);
+            writeLog(info);
+            sem_wait(mutex_sh);
+            SharedMemory->FinishCars++;
+            sem_post(mutex_sh);
+        }
+        else
+        {
+            sem_wait(mutex_sh);
+            SharedMemory->FinishCars++;
+            sem_post(mutex_sh);
+        }
+    }
+    else
+    {
+        writeLog(commands);
+    }
 }
