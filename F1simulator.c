@@ -69,7 +69,7 @@ void init()
     }
 
     shmidTeams = shmget(IPC_PRIVATE, sizeof(Team) * NumTeam, IPC_CREAT | 0700);
-   
+
     //attach shared memory
     if ((SharedMemory->teams = (Team *)shmat(shmidTeams, NULL, 0)) == (Team *)-1)
     {
@@ -110,7 +110,7 @@ void init()
         exit(1);
     }
 
-   /*  sem_unlink(MUTEX_PB); //mutex para Pit Box
+    /*  sem_unlink(MUTEX_PB); //mutex para Pit Box
     mutex_pb = sem_open(MUTEX_PB, O_CREAT | O_EXCL, 0700, 1);
     if (mutex_pb == SEM_FAILED)
     {
@@ -179,9 +179,8 @@ void PrintStats()
     //Total de avarias
     //Total de abastecimentos
     //Total de avarias
-    //Numero de carros em pista   
+    //Numero de carros em pista
     writeStats();
-
 }
 
 void endRace()
@@ -193,26 +192,26 @@ void endRace()
 void writeStats()
 {
     //mete dentro do array todos os carros que participam na corrida
-    Car allCars[NumTeam*NumCars];
-    int t, i, j, k=0, nCarrosPista=0;
+    Car allCars[NumTeam * NumCars];
+    int t, i, j, k = 0, nCarrosPista = 0;
     Car aux;
     Car last = EquipasSHM[0].cars[0];
     char aux2[1024];
     int Maxdist = 0;
 
-    for(i=0; i<SharedMemory->NumTeams; i++)
+    for (i = 0; i < SharedMemory->NumTeams; i++)
     {
-        for (j=0; j < EquipasSHM[i].Numcars; j++)
+        for (j = 0; j < EquipasSHM[i].Numcars; j++)
         {
             allCars[k] = EquipasSHM[i].cars[j];
             //printf("%d\n", EquipasSHM[i].cars[j].model);
             //printf("%d\n", array[k].model);
-            if(EquipasSHM[i].cars[j].distance2finish > Maxdist)
+            if (EquipasSHM[i].cars[j].distance2finish > Maxdist)
             {
                 Maxdist = EquipasSHM[i].cars[j].distance2finish;
                 last = EquipasSHM[i].cars[j];
             }
-            if( EquipasSHM[i].cars[j].state != 4 )
+            if (EquipasSHM[i].cars[j].state != 4)
             {
                 ++nCarrosPista;
             }
@@ -220,15 +219,8 @@ void writeStats()
         }
     }
 
-    // printf("k: %d\n", k);
-    /* for(i=0; i<k; i++)
-    {
-        printf("%d %d\n", array[i].model, array[i].laps);
-    }  */
-    
-
     //ordenar e retirar os 5 primeiros
-    for(i=0; i<k; i++)
+    for (i = 0; i < k; i++)
     {
         for (j = 0; j < k; j++)
         {
@@ -250,27 +242,23 @@ void writeStats()
         t = TOP;
     }
 
-    writeLog("TOP 5");
+    printf("TOP 5\n");
 
-    for(int i=0; i<t; i++)
+    for (int i = 0; i < t; i++)
     {
-        sprintf(aux2, "=>CAR: %d | TEAM: %s | LAPS: %d | BOX: %d", allCars[i].model, allCars[i].team, allCars[i].laps, allCars[i].totalBox);
-        writeLog(aux2);
-    } 
+        printf("=>CAR: %d | TEAM: %s | LAPS: %d | BOX: %d\n", allCars[i].model, allCars[i].team, allCars[i].laps, allCars[i].totalBox);
+    }
 
-    writeLog("CARRO EM ULTIMO LUGAR");
-    sprintf(aux2, "=>CAR: %d | TEAM: %s | LAPS: %d | BOX: %d", last.model, last.team, last.laps, last.totalBox);
-    writeLog(aux2);
+    printf("CARRO EM ULTIMO LUGAR\n");
+    printf("=>CAR: %d | TEAM: %s | LAPS: %d | BOX: %d\n", last.model, last.team, last.laps, last.totalBox);
 
-    sprintf(aux2, "TOTAL DE AVARIAS: %d", SharedMemory->totalAvarias);
-    writeLog(aux2);
+    printf("TOTAL DE AVARIAS: %d\n", SharedMemory->totalAvarias);
 
-    sprintf(aux2, "TOTAL DE ABASTECIMENTOS: %d", SharedMemory->totalAbastecimentos);
-    writeLog(aux2);
+    printf("TOTAL DE ABASTECIMENTOS: %d\n", SharedMemory->totalAbastecimentos);
 
-    sprintf(aux2, "NUMERO DE CARROS EM PISTA: %d", nCarrosPista);
-    writeLog(aux2);
+    printf("NUMERO DE CARROS EM PISTA: %d\n", nCarrosPista);
 
+    kill(0, SIGCONT);
 }
 
 //eliminar todos  os recursos requisitados pelos processos (semaforos, memorias partilhadas...)

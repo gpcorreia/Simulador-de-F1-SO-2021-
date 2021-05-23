@@ -38,6 +38,7 @@ void RaceManager()
         {
             break;
         }
+
         if ((nread = read(fdPipe, &CommandsNP, sizeof(char) * 10000)) != 0) //named pipe
         {
             CommandsNP[nread] = '\0';
@@ -50,6 +51,15 @@ void RaceManager()
                 writeLog(infos);
                 printLista();
                 createTM();
+
+                while (1)
+                {
+                    if (read(p[0], &CommandsUP, sizeof(CommandsUP)) != 0)
+                    {
+                        handleUP(CommandsUP);
+                    }
+                    sleep(4);
+                }
             }
             else if (strcmp(CommandsNP, "START RACE!\n") == 0 && SharedMemory->NumTeams < NumTeam)
             {
@@ -87,11 +97,6 @@ void RaceManager()
                 writeLog(infos);
             }
         }
-
-        /* if (read(p[0], &CommandsUP, sizeof(CommandsUP)) != 0)
-        {
-            handleUP(CommandsUP);
-        } */
     }
 
     for (int i = 0; i < NumTeam; i++)
