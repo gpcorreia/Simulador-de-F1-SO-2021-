@@ -50,7 +50,7 @@ void RaceManager()
                 infos[0] = '\0';
                 sprintf(infos, "NEW COMMAND RECEIVED: START RACE");
                 writeLog(infos);
-                printLista();
+                // printLista();
                 createTM();
             }
             else if (strcmp(CommandsNP, "START RACE!\n") == 0 && SharedMemory->NumTeams < NumTeam)
