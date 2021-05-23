@@ -37,6 +37,7 @@ typedef struct Team
     char name[MAX_CHAR_NAMES];
     int Numcars;
     int FinishCars;
+    int securityCars; //numero de carros em estado de seguranca
     Car cars[2]; //index
     box pitbox;
 } Team;

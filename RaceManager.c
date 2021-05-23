@@ -13,6 +13,7 @@ int checkCar(int car);
 void printLista();
 void writeLog(char *info);
 void createTM();
+void writeStats();
 
 void RaceManager()
 {
@@ -246,7 +247,6 @@ void handleUP(char *commands)
         char info[50];
         int car;
         sscanf(commands, "CAR %d %s", &car, command);
-        printf("%s\n", command);
         if (strcmp(command, "FINISH!") == 0)
         {
             if (SharedMemory->FinishCars == 0)
@@ -256,6 +256,7 @@ void handleUP(char *commands)
                 sem_wait(mutex_sh);
                 SharedMemory->FinishCars++;
                 sem_post(mutex_sh);
+                writeStats();
             }
             else
             {
