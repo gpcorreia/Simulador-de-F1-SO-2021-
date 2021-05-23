@@ -22,7 +22,6 @@ void RaceManager()
 
     int nread;
     char CommandsNP[1000];
-    char CommandsUP[1000];
     char infos[1024];
     pipe(p);
 
@@ -49,7 +48,7 @@ void RaceManager()
                 infos[0] = '\0';
                 sprintf(infos, "NEW COMMAND RECEIVED: START RACE");
                 writeLog(infos);
-                // printLista();
+                printLista();
                 createTM();
             }
             else if (strcmp(CommandsNP, "START RACE!\n") == 0 && SharedMemory->NumTeams < NumTeam)
@@ -88,11 +87,11 @@ void RaceManager()
                 writeLog(infos);
             }
         }
-
-        if (read(p[0], &CommandsUP, sizeof(CommandsUP)) != 0)
-        {
-            printf("%s\n", CommandsUP);
-        }
+        // printLista();
+        // if (write(p[1], &ola, sizeof(ola)) != 0)
+        // {
+        //     printf("%s\n", stateTM);
+        // }
     }
 
     for (int i = 0; i < NumTeam; i++)
