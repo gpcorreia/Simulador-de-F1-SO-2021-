@@ -202,19 +202,19 @@ void writeStats()
     {
         for (j = 0; j < EquipasSHM[i].Numcars; j++)
         {
-            allCars[k] = EquipasSHM[i].cars[j];
-            //printf("%d\n", EquipasSHM[i].cars[j].model);
-            //printf("%d\n", array[k].model);
-            if (EquipasSHM[i].cars[j].laps < minLaps)
-            {
-                minLaps = EquipasSHM[i].cars[j].laps;
-                last = EquipasSHM[i].cars[j];
-            }
             if (EquipasSHM[i].cars[j].state != 4)
             {
+                allCars[k] = EquipasSHM[i].cars[j];
+                //printf("%d\n", EquipasSHM[i].cars[j].model);
+                //printf("%d\n", array[k].model);
+                if (EquipasSHM[i].cars[j].laps < minLaps)
+                {
+                    minLaps = EquipasSHM[i].cars[j].laps;
+                    last = EquipasSHM[i].cars[j];
+                }
                 ++nCarrosPista;
+                k++;
             }
-            k++;
         }
     }
 
@@ -223,11 +223,14 @@ void writeStats()
     {
         for (j = 0; j < k; j++)
         {
-            if (allCars[i].laps > allCars[j].laps)
+            if (EquipasSHM[i].cars[j].state != 4)
             {
-                aux = allCars[j];
-                allCars[j] = allCars[i];
-                allCars[i] = aux;
+                if (allCars[i].laps > allCars[j].laps)
+                {
+                    aux = allCars[j];
+                    allCars[j] = allCars[i];
+                    allCars[i] = aux;
+                }
             }
         }
     }
