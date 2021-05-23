@@ -18,6 +18,7 @@ void TeamManager(int indice)
     inx aux[NumCars];
     pthread_t tid[NumCars]; //thread id
     pthread_mutex_init(&mutex, NULL);
+
     // printLista();
     int i = 0;
     for (i = 0; i < EquipasSHM[indice].Numcars; i++)
@@ -112,8 +113,8 @@ void FixCar(Car *car)
 
 void SendToRM(Car car, int state)
 {
+    close(p[0]);
     sem_wait(mutex_up);
-    close(f[0]);
 
     if (state == 0)
     { // dizer race manager que ficou sem combustivel
@@ -139,6 +140,7 @@ void SendToRM(Car car, int state)
         sprintf(msgUnnamedPipe, "Carro [%d]: FINISH!", car.model);
         write(p[1], &msgUnnamedPipe, sizeof(msgUnnamedPipe));
     }
+    
     sem_post(mutex_up);
 }
 
