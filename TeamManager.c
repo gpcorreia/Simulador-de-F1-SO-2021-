@@ -18,6 +18,7 @@ void TeamManager(int indice)
     inx aux[NumCars];
     pthread_t tid[NumCars]; //thread id
     pthread_mutex_init(&mutex, NULL);
+
     // printLista();
     int i = 0;
     for (i = 0; i < EquipasSHM[indice].Numcars; i++)
@@ -114,7 +115,7 @@ void FixCar(Car *car)
 void SendToRM(Car car, int state)
 {
     sem_wait(mutex_up);
-    close(p[0]);
+    // close(p[0]);
 
     if (state == 0)
     { // dizer race manager que ficou sem combustivel
@@ -124,7 +125,7 @@ void SendToRM(Car car, int state)
     else if (state == 1)
     { // dizer race manager que ficou em SAFE MODE
         msgUnnamedPipe[0] = '\0';
-        sprintf(msgUnnamedPipe, "NEW PROBLEM IN CAR %d!", car.model);
+        sprintf(msgUnnamedPipe, "NEW PROBLEM IN CAR %d (MALFUCTION)!", car.model);
     }
     else if (state == 2)
     { // dizer race manager que ficou saio da BOX
@@ -140,6 +141,11 @@ void SendToRM(Car car, int state)
     { // dizer race manager que ficou saio da BOX
         msgUnnamedPipe[0] = '\0';
         sprintf(msgUnnamedPipe, "CAR %d IN BOX!", car.model);
+    }
+    else if (state == 5)
+    { // dizer race manager que ficou saio da BOX
+        msgUnnamedPipe[0] = '\0';
+        sprintf(msgUnnamedPipe, "NEW PROBLEM CAR %d (ALMOST OUT OF GAS)!", car.model);
     }
 
     write(p[1], &msgUnnamedPipe, sizeof(msgUnnamedPipe));
@@ -164,7 +170,7 @@ void *Carro(inx *aux)
     // printf("Carro : %d ----- Team %s\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
     // printf("O meu Gestor %d\n", getpid());
 
-    while (lapsCompleted < lap && SharedMemory->FinishCars != 0)
+    while (lapsCompleted < lap && SharedMemory->FinishCars == 0)
     {
         //posicao 0 -> meta (onde se encontra a box)
         if (EquipasSHM[aux->team].cars[aux->car].checkBox == 0)
@@ -261,7 +267,7 @@ void *Carro(inx *aux)
                     {
                         EquipasSHM[aux->team].cars[aux->car].checkMal = 3;
                     }
-                    // printf("Carro [%d] sem combustivel para 4 voltas, precisa de ir a box abastecer!\n", EquipasSHM[aux->team].cars[aux->car].model);
+                    printf("Carro [%d] sem combustivel para 4 voltas, precisa de ir a box abastecer!\n", EquipasSHM[aux->team].cars[aux->car].model);
                 }
 
                 //se nao tiver combustivel para 2 voltas entra em modo de seguranca
@@ -277,7 +283,7 @@ void *Carro(inx *aux)
                         EquipasSHM[aux->team].cars[aux->car].checkMal = 1;
                     }
                     printf("Carro [%d] sem combustivel para 2 voltas, MODO SAFE ON\n", EquipasSHM[aux->team].cars[aux->car].model);
-                    SendToRM(EquipasSHM[aux->team].cars[aux->car], 1);
+                    SendToRM(EquipasSHM[aux->team].cars[aux->car], 5);
                 }
 
                 sleep(ut);

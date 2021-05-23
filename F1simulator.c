@@ -45,7 +45,7 @@ void F1simulator() //gestor de corrida("RaceManager") + gestor de Avarias("...")
     else
     {
         signal(SIGTSTP, PrintStats);
-        printf("\nF1 Simulator %d \n", getpid());
+        // printf("\nF1 Simulator %d \n", getpid());
     }
 
     for (int i = 0; i < 2; i++)
@@ -196,7 +196,7 @@ void writeStats()
     int t, i, j, k = 0, nCarrosPista = 0;
     Car aux;
     Car last = EquipasSHM[0].cars[0];
-    int Maxdist = 0;
+    int minLaps = 0;
 
     for (i = 0; i < SharedMemory->NumTeams; i++)
     {
@@ -205,9 +205,9 @@ void writeStats()
             allCars[k] = EquipasSHM[i].cars[j];
             //printf("%d\n", EquipasSHM[i].cars[j].model);
             //printf("%d\n", array[k].model);
-            if (EquipasSHM[i].cars[j].distance2finish > Maxdist)
+            if (EquipasSHM[i].cars[j].laps < minLaps)
             {
-                Maxdist = EquipasSHM[i].cars[j].distance2finish;
+                minLaps = EquipasSHM[i].cars[j].laps;
                 last = EquipasSHM[i].cars[j];
             }
             if (EquipasSHM[i].cars[j].state != 4 && EquipasSHM[i].cars[j].state != 3)
