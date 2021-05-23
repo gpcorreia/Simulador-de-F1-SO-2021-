@@ -23,7 +23,7 @@ void TeamManager(int indice)
     for (int i = 0; i < EquipasSHM[aux.team].Numcars; i++)
     {
         aux.car = i;
-        printf("aux.car = %d\n", aux.car);
+        //printf("aux.car = %d\n", aux.car);
         if (pthread_create(&tid[i], NULL, &Carro, &aux) != 0)
         {
             perror("Erro a criar thread.\n");
@@ -117,7 +117,7 @@ void *Carro(inx *aux)
     // printf("Carro da equipa %d\n", getpid());
     // pthread_mutex_unlock(&mutex);
     message my_msg;
-    printf("aux -> %d %d\n", aux->team, aux->car);
+    //printf("aux -> %d %d\n", aux->team, aux->car);
 
     //int TotalDistance = lap * dv;
     int lapsCompleted = 0;
@@ -133,8 +133,6 @@ void *Carro(inx *aux)
     if(EquipasSHM[aux->team].cars[aux->car].checkBox == 0)
     {
         printf("Chegada a meta, %d volta(s) concluida(s)! -> Carro [%d]\n", lapsCompleted, EquipasSHM[aux->team].cars[aux->car].model);
-        lapsCompleted++;
-        distancePerLap = 0;
 
         //if checkbox == 0 tenta entra na box 
         //verificar se o carro precisa de ir a box
@@ -249,12 +247,11 @@ void *Carro(inx *aux)
                 printf("Carro [%d] sem combustivel para 2 voltas, MODO SAFE ON\n", EquipasSHM[aux->team].cars[aux->car].model);
             }
             
-            sleep(ut);
+            //sleep(ut);
             //printf("Carro [%d] percorre %d da %d volta!\n", EquipasSHM[aux->team].cars[aux->car].model, distancePerLap, lapsCompleted);
             //printf("Carro [%d] deposito -> %fS\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].oilcap);
         }
         
-        printf("Chegada a meta, %d volta(s) concluida(s)! -> Carro [%d]\n", lapsCompleted, EquipasSHM[aux->team].cars[aux->car].model);
         
 
         if(EquipasSHM[aux->team].cars[aux->car].state == 3)
@@ -272,12 +269,16 @@ void *Carro(inx *aux)
         }
 
         //sleep(ut);
+        lapsCompleted++;
+        distancePerLap = 0;
+        //printf("Chegada a meta, %d volta(s) concluida(s)! -> Carro [%d]\n", lapsCompleted, EquipasSHM[aux->team].cars[aux->car].model);
 
     }
 
     if (SharedMemory->FinishCars == 0 && EquipasSHM[aux->team].cars[aux->car].state != 3)
     {
         sem_wait(mutex_sh);
+        EquipasSHM[aux->team].cars[aux->car].state = 4;
         SharedMemory->FinishCars++;
         sem_post(mutex_sh);
         printf("Carro : %d ----- Team %s -> Ganhou a Corrida!!\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
@@ -293,6 +294,7 @@ void *Carro(inx *aux)
     else
     {
         sem_wait(mutex_sh);
+        EquipasSHM[aux->team].cars[aux->car].state = 4;
         SharedMemory->desistencias++;
         sem_post(mutex_sh);
         printf("Carro : %d ----- Team %s -> Desistencia!!\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);

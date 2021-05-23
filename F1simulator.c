@@ -212,7 +212,7 @@ void writeStats()
                 Maxdist = EquipasSHM[i].cars[j].distance2finish;
                 last = EquipasSHM[i].cars[j];
             }
-            if( (EquipasSHM[i].cars[j].state == 0) || (EquipasSHM[i].cars[j].state == 1) || (EquipasSHM[i].cars[j].state == 2) )
+            if( EquipasSHM[i].cars[j].state != 4 )
             {
                 ++nCarrosPista;
             }
