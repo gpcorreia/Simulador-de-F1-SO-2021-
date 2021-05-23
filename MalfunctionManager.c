@@ -59,12 +59,12 @@ int notificaCarros()
                 msg.msgtype = EquipasSHM[i].cars[j].model;
                 msg.avaria = auxAvaria;
 
-                if (auxAvaria == 1)
+                /* if (auxAvaria == 1)
                 {
                     sem_wait(mutex_sh);
                     SharedMemory->totalAvarias++,
-                        sem_post(mutex_sh);
-                }
+                    sem_post(mutex_sh);
+                } */
 
                 //notifica o carro
                 if (msgsnd(msqid, &msg, sizeof(msg), 0) == -1)
@@ -72,7 +72,11 @@ int notificaCarros()
                     perror("Error: msgsnd()\n");
                     exit(1);
                 }
+<<<<<<< HEAD
                 // printf("Enviei para mq -> carro: %ld, avaria: %d\n", msg.msgtype, msg.avaria);
+=======
+                //printf("Enviei para mq -> carro: %ld, avaria: %d\n", msg.msgtype, msg.avaria);
+>>>>>>> origin/main
             }
         }
     }
