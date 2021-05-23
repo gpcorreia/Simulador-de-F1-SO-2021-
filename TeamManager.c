@@ -45,13 +45,28 @@ void TeamManager(int indice)
                 sem_wait(mutex_sh);
                 EquipasSHM[indice].pitbox.state = 1;
                 FixCar(&EquipasSHM[indice].cars[i]);
-                EquipasSHM[indice].pitbox.state = 0;
+                if( (EquipasSHM[indice].cars[i].checkMal == 1) || (EquipasSHM[indice].cars[i].checkMal == 2) || (EquipasSHM[indice].cars[i].checkMal == 4) )
+                {
+                    --EquipasSHM[indice].securityCars;
+                }
                 EquipasSHM[indice].pitbox.car = 0;
                 EquipasSHM[indice].cars[i].checkMal = 0;
+
+                if(EquipasSHM[indice].securityCars >= 2)
+                {
+                    EquipasSHM[indice].pitbox.state = 2;
+                    //printf("Box da equipa %s continua reservada!\n", EquipasSHM[indice].name);
+                }
+                else
+                {
+                    EquipasSHM[indice].pitbox.state = 0;
+                    //printf("Box da equipa %s deixa de estar reservada!\n", EquipasSHM[indice].name);
+                }
+
                 EquipasSHM[indice].cars[i].state = 0;
                 EquipasSHM[indice].cars[i].checkBox = 0;
                 sem_post(mutex_sh);
-                printf("Carro [%d] sai da box\n", EquipasSHM[indice].cars[i].model);
+                //printf("Carro [%d] sai da box\n", EquipasSHM[indice].cars[i].model);
             }
         }
     }
@@ -140,7 +155,6 @@ void SendToRM(Car car, int state)
         sprintf(msgUnnamedPipe, "Carro [%d]: FINISH!", car.model);
         write(p[1], &msgUnnamedPipe, sizeof(msgUnnamedPipe));
     }
-    
     sem_post(mutex_up);
 }
 
@@ -165,6 +179,7 @@ void *Carro(inx *aux)
     while (lapsCompleted < lap)
     {
         //posicao 0 -> meta (onde se encontra a box)
+        //check box ve se o carro se encontra dentro da box
         if (EquipasSHM[aux->team].cars[aux->car].checkBox == 0)
         {
             //if checkbox == 0 tenta entra na box
@@ -180,11 +195,11 @@ void *Carro(inx *aux)
                     EquipasSHM[aux->team].pitbox.state = 1;
                     EquipasSHM[aux->team].cars[aux->car].checkBox = 1;
                     sem_post(mutex_sh);
-                    printf("Carro [%d] entrou na box!\n", EquipasSHM[aux->team].cars[aux->car].model);
+                    //printf("Carro [%d] entrou na box (estava vazia)!\n", EquipasSHM[aux->team].cars[aux->car].model);
                 }
 
-                //verifica se a box esta reservada e sou o carro q a reservou
-                else if ((EquipasSHM[aux->team].pitbox.state == 2) && (EquipasSHM[aux->team].cars[aux->car].state == 5))
+                //verifica se a box esta reservada e se o carro que pretende entrar esta em estado de seguranca
+                else if ((EquipasSHM[aux->team].pitbox.state == 2) && (EquipasSHM[aux->team].cars[aux->car].state == 1) )
                 {
                     sem_wait(mutex_sh);
                     EquipasSHM[aux->team].pitbox.car = EquipasSHM[aux->team].cars[aux->car].model;
@@ -192,7 +207,7 @@ void *Carro(inx *aux)
                     EquipasSHM[aux->team].pitbox.state = 1;
                     EquipasSHM[aux->team].cars[aux->car].checkBox = 1;
                     sem_post(mutex_sh);
-                    printf("Carro [%d] entrou na box!\n", EquipasSHM[aux->team].cars[aux->car].model);
+                    //printf("Carro [%d] entrou na box reservada!\n", EquipasSHM[aux->team].cars[aux->car].model);
                 }
 
                 else
@@ -222,6 +237,7 @@ void *Carro(inx *aux)
                         EquipasSHM[aux->team].cars[aux->car].state = 1;
                         EquipasSHM[aux->team].cars[aux->car].checkMal = 4;
                         SharedMemory->totalAvarias++;
+                        EquipasSHM[aux->team].securityCars++;
                         printf("Carro [%d] HAD MALFUNCTION, MODE SAFE ON\n", EquipasSHM[aux->team].cars[aux->car].model);
                         SendToRM(EquipasSHM[aux->team].cars[aux->car], 1);
                     }
@@ -273,9 +289,16 @@ void *Carro(inx *aux)
                     else
                     {
                         EquipasSHM[aux->team].cars[aux->car].checkMal = 1;
+                        EquipasSHM[aux->team].securityCars++;
                     }
                     printf("Carro [%d] sem combustivel para 2 voltas, MODO SAFE ON\n", EquipasSHM[aux->team].cars[aux->car].model);
                     SendToRM(EquipasSHM[aux->team].cars[aux->car], 1);
+                }
+
+                if(EquipasSHM[aux->team].securityCars >= 2)
+                {
+                    EquipasSHM[aux->team].pitbox.state = 2;
+                    printf("Box da equipa %s fica em estado de reserva\n", EquipasSHM[aux->team].name);
                 }
 
                 sleep(ut);
@@ -316,6 +339,7 @@ void *Carro(inx *aux)
         sem_wait(mutex_sh);
         EquipasSHM[aux->team].cars[aux->car].state = 4;
         SharedMemory->desistencias++;
+        EquipasSHM[aux->team].securityCars--;
         sem_post(mutex_sh);
         printf("Carro : %d ----- Team %s -> Desistencia!!\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].team);
         SendToRM(EquipasSHM[aux->team].cars[aux->car], 0);
