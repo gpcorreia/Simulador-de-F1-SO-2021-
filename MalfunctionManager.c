@@ -72,11 +72,7 @@ int notificaCarros()
                     perror("Error: msgsnd()\n");
                     exit(1);
                 }
-<<<<<<< HEAD
                 // printf("Enviei para mq -> carro: %ld, avaria: %d\n", msg.msgtype, msg.avaria);
-=======
-                //printf("Enviei para mq -> carro: %ld, avaria: %d\n", msg.msgtype, msg.avaria);
->>>>>>> origin/main
             }
         }
     }

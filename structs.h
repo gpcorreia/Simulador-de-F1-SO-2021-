@@ -15,14 +15,9 @@ typedef struct Car
     int reliability;
     float oilcap;
     int totalBox; //numero de entradas na box
-<<<<<<< HEAD
-    int checkMal; // 0 - corrida  1 - Segurança pq precisa de Abastecer   2 - Abastecer e Avaria
-    int checkBox;
-=======
     int checkMal; // 0 - nada a fazer  1 - Segurança pq precisa de Abastecer   2 - Abastecer e Avaria  3 - Abastecer mas nao em estado de segurança
->>>>>>> origin/main
     int distance2finish;
-    int checkBox; 
+    int checkBox;
 } Car;
 
 typedef struct indices
