@@ -87,10 +87,11 @@ void RaceManager()
                 writeLog(infos);
             }
         }
-        // if (read(p[0], &CommandsUP, sizeof(CommandsUP)) != 0)
-        // {
-        //     handleUP(CommandsUP);
-        // }
+
+        /* if (read(p[0], &CommandsUP, sizeof(CommandsUP)) != 0)
+        {
+            handleUP(CommandsUP);
+        } */
     }
 
     for (int i = 0; i < NumTeam; i++)
@@ -238,7 +239,7 @@ void handleUP(char *commands)
     char command[50];
     char info[50];
     int car;
-    sscanf(commands, "Carro [%d]: %s!", car, command);
+    sscanf(commands, "Carro [%d]: %s!", &car, command);
 
     if (strcmp(command, "FINISH") == 0)
     {
