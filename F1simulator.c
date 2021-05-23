@@ -196,7 +196,6 @@ void writeStats()
     int t, i, j, k = 0, nCarrosPista = 0;
     Car aux;
     Car last = EquipasSHM[0].cars[0];
-    char aux2[1024];
     int Maxdist = 0;
 
     for (i = 0; i < SharedMemory->NumTeams; i++)
@@ -211,7 +210,7 @@ void writeStats()
                 Maxdist = EquipasSHM[i].cars[j].distance2finish;
                 last = EquipasSHM[i].cars[j];
             }
-            if (EquipasSHM[i].cars[j].state != 4)
+            if (EquipasSHM[i].cars[j].state != 4 && EquipasSHM[i].cars[j].state != 3)
             {
                 ++nCarrosPista;
             }

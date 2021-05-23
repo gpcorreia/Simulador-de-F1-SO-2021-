@@ -79,7 +79,7 @@ void RaceManager()
                 }
                 else
                 {
-                    writeLog("Race Already Started!");
+                    writeLog("Rejected, Race Already Started!");
                 }
             }
             else
@@ -242,11 +242,12 @@ void handleUP(char *commands)
 {
     if (strlen(commands) > 0)
     {
+        printf("%s", commands);
 
         char command[50];
         char info[50];
         int car;
-        sscanf(commands, "Carro [%d]: %s!", &car, command);
+        sscanf(commands, "Carro %d %s!", &car, command);
 
         if (strcmp(command, "FINISH") == 0)
         {
