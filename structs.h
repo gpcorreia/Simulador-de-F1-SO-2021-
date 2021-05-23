@@ -17,6 +17,7 @@ typedef struct Car
     int totalBox; //numero de entradas na box
     int checkMal; // 0 - nada a fazer  1 - Segurança pq precisa de Abastecer   2 - Abastecer e Avaria  3 - Abastecer mas nao em estado de segurança
     int distance2finish;
+    int checkBox; 
 } Car;
 
 typedef struct indices

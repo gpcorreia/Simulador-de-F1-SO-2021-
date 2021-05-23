@@ -45,8 +45,9 @@ void TeamManager(int indice)
                 FixCar(&EquipasSHM[aux.team].cars[i]);
                 EquipasSHM[aux.team].pitbox.state = 0;
                 EquipasSHM[aux.team].pitbox.car = 0;
-                EquipasSHM[aux.team].cars[aux.car].state = 0;
                 EquipasSHM[aux.team].cars[aux.car].checkMal = 0;
+                EquipasSHM[aux.team].cars[aux.car].state = 0;
+                EquipasSHM[aux.team].cars[aux.car].checkBox = 0;
                 sem_post(mutex_sh);
                 printf("Carro [%d] sai da box\n", EquipasSHM[aux.team].cars[i].model);
             }
@@ -71,11 +72,11 @@ void FixCar(Car *car)
     //abastecer
     if (car->checkMal == 1 || car->checkMal == 3)
     {
-        car->state = 0;
+        //car->state = 0;
         time = 2 * ut;
         car->totalBox++;
         car->oilcap = oilcap;
-        car->checkMal = 0;
+        //car->checkMal = 0;
         SharedMemory->totalAbastecimentos++;
         sleep(time);
         printf("Carro [%d] abasteceu!\n", car->model);
@@ -85,10 +86,10 @@ void FixCar(Car *car)
     else if (car->checkMal == 2)
     {
         time = rand() % max + min;
-        car->state = 0;
+        //car->state = 0;
         car->totalBox++;
         car->oilcap = oilcap;
-        car->checkMal = 0;
+        //car->checkMal = 0;
         SharedMemory->totalAbastecimentos++;
         sleep(time + 2 * ut);
         printf("Carro [%d] abasteceu e tratou de uma avaria!\n", car->model);
@@ -120,6 +121,8 @@ void *Carro(inx *aux)
 
         //if checkbox == 0 tenta entra na box 
         //verificar se o carro precisa de ir a box
+    if(EquipasSHM[aux->team].cars[aux->car].checkBox == 0)
+    {
         if(EquipasSHM[aux->team].cars[aux->car].checkMal != 0)
         {
             //verifica se a box esta livre
@@ -129,6 +132,7 @@ void *Carro(inx *aux)
                 EquipasSHM[aux->team].pitbox.car = EquipasSHM[aux->team].cars[aux->car].model;
                 EquipasSHM[aux->team].cars[aux->car].state = 2;
                 EquipasSHM[aux->team].pitbox.state = 1;
+                EquipasSHM[aux->team].cars[aux->car].checkBox = 1;
                 sem_post(mutex_sh);
                 printf("Carro [%d] entrou na box!\n", EquipasSHM[aux->team].cars[aux->car].model);
             }
@@ -140,6 +144,7 @@ void *Carro(inx *aux)
                 EquipasSHM[aux->team].pitbox.car = EquipasSHM[aux->team].cars[aux->car].model;
                 EquipasSHM[aux->team].cars[aux->car].state = 2;
                 EquipasSHM[aux->team].pitbox.state = 1;
+                EquipasSHM[aux->team].cars[aux->car].checkBox = 1;
                 sem_post(mutex_sh);
                 printf("Carro [%d] entrou na box!\n", EquipasSHM[aux->team].cars[aux->car].model);
             }
@@ -152,7 +157,6 @@ void *Carro(inx *aux)
         }
 
         my_msg.avaria = 0;
-
         
         //corrida, 1 while = 1 volta
         while(distancePerLap < dv)
@@ -170,7 +174,6 @@ void *Carro(inx *aux)
                 //ativa modo de segurnça
                 if(my_msg.avaria == 1)
                 {
-
                     EquipasSHM[aux->team].cars[aux->car].state = 1;
                     EquipasSHM[aux->team].cars[aux->car].checkMal = 2;
                     printf("Carro [%d] HAD MALFUNCTION, MODE SAFE ON\n", EquipasSHM[aux->team].cars[aux->car].model);
@@ -215,10 +218,12 @@ void *Carro(inx *aux)
                 printf("Carro [%d] sem combustivel para 2 voltas, MODO SAFE ON\n", EquipasSHM[aux->team].cars[aux->car].model);
             }
             
-            //sleep(ut);
-            //printf("Carro [%d] percorre %d da %d volta!\n", EquipasSHM[aux->team].cars[aux->car].model, distancePerLap, lapsCompleted);
-            //printf("Carro [%d] deposito -> %fS\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].oilcap);
+            sleep(ut);
+            printf("Carro [%d] percorre %d da %d volta!\n", EquipasSHM[aux->team].cars[aux->car].model, distancePerLap, lapsCompleted);
+            printf("Carro [%d] deposito -> %fS\n", EquipasSHM[aux->team].cars[aux->car].model, EquipasSHM[aux->team].cars[aux->car].oilcap);
         }
+        
+        
 
         if(EquipasSHM[aux->team].cars[aux->car].state == 3)
         {
@@ -226,9 +231,15 @@ void *Carro(inx *aux)
             break;
         }
 
-        sleep(ut);
-        printf("Chegada a meta, %d volta(s) concluida(s)! -> Carro [%d]\n", lapsCompleted, EquipasSHM[aux->team].cars[aux->car].model);
+        }//fecha if
 
+        else 
+        {
+            printf("sleep 3 s\n");
+            sleep(3);    
+        }
+        //sleep(ut);
+        printf("Chegada a meta, %d volta(s) concluida(s)! -> Carro [%d]\n", lapsCompleted, EquipasSHM[aux->team].cars[aux->car].model);
 
        /*  msgrcv(msqid, &my_msg, sizeof(my_msg), EquipasSHM[aux->team].cars[aux->car].model, IPC_NOWAIT);
 
